@@ -1,0 +1,291 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system — Azka Azeem portfolio.
+ * Red + Black. All colors are oklch tokens; never hardcode colors in components.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-hand: var(--font-hand);
+  --shadow-glow: 0 0 0 1px var(--ring), 0 18px 60px -20px var(--glow);
+  --shadow-glow-soft: 0 12px 40px -18px var(--glow);
+}
+
+:root {
+  --radius: 0.5rem;
+
+  --background: oklch(0.13 0.004 285);
+  --foreground: oklch(0.97 0.002 285);
+
+  --surface: oklch(0.17 0.006 285);
+  --surface-2: oklch(0.21 0.008 285);
+
+  --card: oklch(0.16 0.006 285);
+  --card-foreground: oklch(0.97 0.002 285);
+  --popover: oklch(0.17 0.006 285);
+  --popover-foreground: oklch(0.97 0.002 285);
+
+  --primary: oklch(0.58 0.222 25.5);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.22 0.008 285);
+  --secondary-foreground: oklch(0.95 0.002 285);
+
+  --muted: oklch(0.22 0.006 285);
+  --muted-foreground: oklch(0.7 0.006 285);
+
+  --accent: oklch(0.28 0.05 25);
+  --accent-foreground: oklch(0.97 0.002 285);
+
+  --destructive: oklch(0.58 0.222 25.5);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.28 0.008 285);
+  --input: oklch(0.28 0.008 285);
+  --ring: oklch(0.58 0.222 25.5 / 45%);
+  --glow: oklch(0.58 0.222 25.5 / 55%);
+
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+@utility display-xl {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  line-height: 0.88;
+  text-transform: uppercase;
+}
+
+@utility section-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+@utility surface-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Grain / noise overlay used sparingly on dark sections */
+@utility grain {
+  position: relative;
+}
+
+@utility red-underline {
+  position: relative;
+}
+
+@layer components {
+  .red-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 1px;
+    width: 0;
+    background: var(--primary);
+    transition: width 0.35s ease;
+  }
+
+  .red-underline:hover::after {
+    width: 100%;
+  }
+}
+
+/* Infinite marquee */
+@keyframes marquee-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-left {
+  animation: marquee-left var(--marquee-duration, 40s) linear infinite;
+}
+
+.marquee-right {
+  animation: marquee-right var(--marquee-duration, 40s) linear infinite;
+}
+
+.edge-fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+/* Soft floating glow blob */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -24px, 0) scale(1.06);
+  }
+}
+
+.blob {
+  animation: float-slow 14s ease-in-out infinite;
+  filter: blur(90px);
+}
+
+/* Hero wave */
+@keyframes wave-shift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.wave-anim {
+  animation: wave-shift var(--wave-duration, 18s) linear infinite;
+}
+
+/* Lightning sweep for the profile image hover */
+@keyframes lightning-flicker {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.5;
+  }
+}
+
+.lightning-layer {
+  animation: lightning-flicker 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .marquee-left,
+  .marquee-right,
+  .blob,
+  .wave-anim,
+  .lightning-layer {
+    animation: none !important;
+  }
+}
+
+/* Electric pulse travelling around the wordmark outlines */
+@keyframes wm-dash {
+  from {
+    stroke-dashoffset: 1400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.wm-pulse {
+  stroke-dasharray: 90 1310;
+  animation: wm-dash 5.5s linear infinite;
+}
+
+.wm-pulse-white {
+  stroke-dasharray: 30 1370;
+  animation-duration: 5.5s;
+  animation-delay: -0.35s;
+}
+
+/* Sticky navbar surface once scrolled */
+.nav-scrolled {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 40px -28px var(--glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-pulse {
+    animation: none !important;
+  }
+}
