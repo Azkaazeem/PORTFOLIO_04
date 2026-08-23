@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { askAgent } from "@/lib/agent.functions";
+import aiChat from "../assets/chat ai.jpg";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -54,7 +55,9 @@ export default function AgentChat() {
 
   return (
     <>
-      <button
+      {/* 3. Yahan import nahi likhna, direct button start karein */}
+      <button 
+        style={{ backgroundImage: `url(${aiChat})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close chat" : "Chat with Azka's Agent"}
         className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform hover:scale-105"

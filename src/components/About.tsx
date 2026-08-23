@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import profile from "@/assets/profile.jpg";
+import profile from "@/assets/profile.png";
 import { bioParagraphs } from "@/data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -104,4 +104,3 @@ export default function About() {
     </section>
   );
 }
-
