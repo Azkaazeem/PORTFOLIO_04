@@ -1,87 +1,96 @@
-import { useEffect, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { useRef } from "react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Github } from "lucide-react";
 import { projects } from "@/data/portfolio";
 
-// Slight rotations create the layered, overlapping composition (desktop only).
-const rotations = [-7, -3, 0, 4, 8];
-
 export default function Projects() {
-  const [active, setActive] = useState<number | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    const onChange = () => setIsDesktop(mql.matches);
-    onChange();
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const { clientWidth, scrollLeft } = scrollRef.current;
+      // Scroll by mostly one screen width, leaving a bit of context
+      const scrollAmount = direction === "left" ? -(clientWidth * 0.8) : (clientWidth * 0.8);
+      scrollRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: "smooth" });
+    }
+  };
 
   return (
     <section id="projects" className="relative overflow-hidden py-16 sm:py-24 lg:py-28">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <p className="section-label text-[0.62rem] sm:text-[0.72rem]">Selected Work</p>
-        <h2 className="display-xl mt-3 text-4xl sm:text-5xl lg:text-7xl">
-          My <span className="text-primary">Projects</span>
-        </h2>
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+        <div>
+          <p className="section-label text-[0.62rem] sm:text-[0.72rem]">Selected Work</p>
+          <h2 className="display-xl mt-3 text-4xl sm:text-5xl lg:text-7xl">
+            My <span className="text-primary">Projects</span>
+          </h2>
+        </div>
+        
+        {/* Carousel Navigation Arrows */}
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => scroll("left")}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+            aria-label="Previous project"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button 
+            onClick={() => scroll("right")}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+            aria-label="Next project"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </div>
       </div>
 
-      {/* Project hover animation: focused card straightens and lifts */}
-      <div className="mx-auto mt-10 grid max-w-7xl grid-cols-1 justify-items-center gap-5 px-5 sm:grid-cols-2 sm:px-8 lg:mt-16 lg:flex lg:-space-x-16 lg:flex-row lg:justify-center lg:gap-0">
-        {projects.map((project, i) => {
-          const isActive = active === i;
-          const dimmed = active !== null && !isActive;
-
-          return (
-            <button
-              key={project.name}
-              onMouseEnter={() => setActive(i)}
-              onMouseLeave={() => setActive(null)}
-              onFocus={() => setActive(i)}
-              onBlur={() => setActive(null)}
-              className="group relative w-full max-w-sm shrink-0 overflow-hidden rounded-md border border-border bg-card text-left transition-all duration-500 ease-out"
-              style={{
-                transform: isDesktop
-                  ? `rotate(${isActive ? 0 : rotations[i]}deg) scale(${isActive ? 1.07 : 1})`
-                  : isActive
-                    ? "scale(1.02)"
-                    : undefined,
-                zIndex: isActive ? 30 : 10 + i,
-                filter: dimmed ? "brightness(0.45)" : "brightness(1)",
-                boxShadow: isActive ? "var(--shadow-glow-soft)" : "none",
-                borderColor: isActive ? "var(--primary)" : "var(--border)",
-              }}
-              aria-label={`${project.name} — ${project.tech}`}
-            >
-              <div className="relative">
-                <img
-                  src={project.image}
-                  alt={`${project.name} project screenshot`}
-                  width={1200}
-                  height={800}
-                  loading="lazy"
-                  className="aspect-[3/2] w-full object-cover"
-                />
-                <div
-                  className={`absolute inset-0 flex items-center justify-center bg-muted/45 transition-opacity duration-400 ${
-                    isActive ? "opacity-100" : "opacity-0"
-                  }`}
+      {/* Projects Slider */}
+      <div 
+        ref={scrollRef}
+        className="mt-10 mx-auto max-w-[1400px] px-5 sm:px-8 flex gap-6 overflow-x-auto snap-x snap-mandatory pb-10 [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {projects.map((project, i) => (
+          <div 
+            key={i} 
+            className="group relative w-[85vw] max-w-[400px] shrink-0 snap-center overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary hover:shadow-glow-soft"
+          >
+            <div className="relative aspect-[4/3] overflow-hidden">
+              <img
+                src={project.image}
+                alt={`${project.name} screenshot`}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-background/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-4">
+                <a 
+                  href={project.url} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
                 >
-                  <span className="grid h-14 w-14 place-items-center rounded-full border border-primary bg-background/80">
-                    <ArrowUpRight className="h-6 w-6 text-primary" />
-                  </span>
-                </div>
+                  Live Demo <ArrowUpRight className="h-4 w-4" />
+                </a>
+                {project.github && (
+                  <a 
+                    href={project.github} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="flex items-center gap-2 rounded-full border border-white/30 bg-black/40 px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-black/60"
+                  >
+                    GitHub <Github className="h-4 w-4" />
+                  </a>
+                )}
               </div>
-              <div className="px-5 py-4">
-                <h3 className="text-base font-semibold">{project.name}</h3>
-                <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                  {project.tech}
-                </p>
-              </div>
-            </button>
-          );
-        })}
+            </div>
+            
+            <div className="px-6 py-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                {project.tech}
+              </p>
+              <h3 className="mt-2 text-xl font-bold">{project.name}</h3>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

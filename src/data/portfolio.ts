@@ -1,16 +1,20 @@
-// Single source of truth for all portfolio content.
-import project1 from "@/assets/project-1.jpg";
-import project2 from "@/assets/project-2.jpg";
-import project3 from "@/assets/project-3.jpg";
-import project4 from "@/assets/project-4.jpg";
-import project5 from "@/assets/project-5.jpg";
-import certImage from "@/assets/cert-placeholder.jpg";
-import cert1 from "@/assets/1.jpg";
-import cert2 from "@/assets/2.jpg";
-import cert3 from "@/assets/3.jpg";
-import cert4 from "@/assets/4.jpg";
-import cert5 from "@/assets/5.jpg";
-import cert6 from "@/assets/6.jpg";
+import cert1 from "@/assets/Certificates/1.jpg";
+import cert2 from "@/assets/Certificates/2.jpg";
+import cert3 from "@/assets/Certificates/3.jpg";
+import cert4 from "@/assets/Certificates/4.jpg";
+import cert5 from "@/assets/Certificates/5.jpg";
+import cert6 from "@/assets/Certificates/6.jpg";
+
+import proj1 from "@/assets/Projects/01- Zakora.png";
+import proj2 from "@/assets/Projects/02- WanderLust.png";
+import proj3 from "@/assets/Projects/03- Fix My Area.png";
+import proj4 from "@/assets/Projects/04- SMIT Hub.png";
+import proj5 from "@/assets/Projects/05- Expense Tracker.png";
+import proj6 from "@/assets/Projects/06- Task Manager.png";
+import proj7 from "@/assets/Projects/07- Authentication & Authorization.png";
+import proj8 from "@/assets/Projects/08- Synth.png";
+import proj9 from "@/assets/Projects/09- Imtiaz Clone.png";
+import proj10 from "@/assets/Projects/10- Pet Accessories.png";
 
 export const navItems = [
   { label: "Home", id: "home" },
@@ -83,8 +87,6 @@ export const skills: Skill[] = [
   { name: "Figma", category: "Design", logo: logo("figma") },
 ];
 
-
-
 export type Certification = {
   title: string;
   issuer: string;
@@ -105,14 +107,20 @@ export type Project = {
   tech: string;
   image: string;
   url: string;
+  github: string;
 };
 
 export const projects: Project[] = [
-  { name: "ShopSphere", tech: "MERN · E-Commerce", image: project1, url: "#projects" },
-  { name: "TaskFlow", tech: "React · Redux · Node", image: project2, url: "#projects" },
-  { name: "Azka's Agent", tech: "AI · Prompt Engineering", image: project3, url: "#projects" },
-  { name: "Design Studio", tech: "Canva · Photoshop", image: project4, url: "#projects" },
-  { name: "WeatherLog", tech: "React · API · Charts", image: project5, url: "#projects" },
+  { name: "Zakora Social", tech: "Social Media App", image: proj1, url: "https://social-media-app-frontend-sand.vercel.app/", github: "https://github.com/Azkaazeem/SOCIAL_MEDIA_APP_FRONTEND" },
+  { name: "WanderLust", tech: "Travel Listings", image: proj2, url: "https://delta-project-chmye3djs-azka-azeems-projects.vercel.app/listings", github: "https://github.com/Azkaazeem/DELTA_PROJECT" },
+  { name: "Fix my area for PK", tech: "Community Platform", image: proj3, url: "https://fix-my-area-for-pk-xsl7.vercel.app/", github: "https://github.com/Azkaazeem/Fix-My-Area-For-PK" },
+  { name: "SMIT Hub", tech: "Hackathon Project", image: proj4, url: "https://module-03-hackathon.vercel.app/", github: "https://github.com/Azkaazeem/MODULE03_HACKATHON" },
+  { name: "Expense Tracker", tech: "Finance Tracker", image: proj5, url: "https://frontend-last-assignment.vercel.app/", github: "https://github.com/Azkaazeem/FRONTEND_LAST_ASSIGNMENT" },
+  { name: "Task Manager", tech: "Trello Clone", image: proj6, url: "https://trello-application-one.vercel.app/", github: "https://github.com/Azkaazeem/Trello-Application" },
+  { name: "Complete Auth", tech: "Authentication System", image: proj7, url: "https://complete-ten-classes-practice-memb.vercel.app/signin", github: "https://github.com/Azkaazeem/COMPLETE_TEN_CLASSES_PRACTICE" },
+  { name: "Synth", tech: "Web App", image: proj8, url: "https://synth-tawny.vercel.app/", github: "https://github.com/Azkaazeem/SYNTH" },
+  { name: "Imtiaz Store Clone", tech: "E-Commerce", image: proj9, url: "https://azkaazeem.github.io/Imtiaz-Store-clone-website/", github: "https://github.com/Azkaazeem/Imtiaz-Store-clone-website" },
+  { name: "Pet Accessories Store", tech: "E-Commerce", image: proj10, url: "https://azkaazeem.github.io/Pet-Accessories-Store-/", github: "https://github.com/Azkaazeem/Pet-Accessories-Store-" },
 ];
 
 export const contact = {
