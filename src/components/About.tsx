@@ -31,16 +31,16 @@ export default function About() {
         scrollTrigger: {
           trigger: root.current,
           start: "top top",
-          end: "+=150%", // Scroll distance
+          end: "+=75%", // Scroll distance
           pin: true,
-          scrub: 1,
+          scrub: 0.5,
         }
       });
 
       tl.fromTo(
         gsap.utils.toArray("[data-bio-line]"),
         { opacity: 0.15 },
-        { opacity: 1, stagger: 0.5, ease: "none", duration: 2 }
+        { opacity: 1, stagger: 0.5, ease: "none", duration: 1 }
       );
     }, root);
 

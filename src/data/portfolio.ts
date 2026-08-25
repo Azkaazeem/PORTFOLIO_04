@@ -56,7 +56,7 @@ export type Skill = { name: string; category: string; logo: string };
 
 export const skills: Skill[] = [
   { name: "MongoDB", category: "Database", logo: logo("mongodb") },
-  { name: "Mongoose", category: "Database", logo: logo("mongoose") },
+  { name: "Mongoose", category: "Database", logo: logo("mongodb") },
   { name: "PostgreSQL", category: "SQL", logo: logo("postgresql") },
   { name: "Node.js", category: "Backend", logo: logo("nodedotjs") },
   { name: "Express.js", category: "Backend", logo: logo("express") },
@@ -65,9 +65,9 @@ export const skills: Skill[] = [
   { name: "Supabase", category: "Backend", logo: logo("supabase") },
   { name: "Tailwind CSS", category: "Styling", logo: logo("tailwindcss") },
   { name: "Bootstrap", category: "Styling", logo: logo("bootstrap") },
-  { name: "EJS", category: "Templating", logo: logo("ejs") },
+  { name: "EJS", category: "Templating", logo: logo("javascript") },
   { name: "HTML5", category: "Markup", logo: logo("html5") },
-  { name: "CSS3", category: "Styling", logo: logo("css") },
+  { name: "CSS3", category: "Styling", logo: logo("css3") },
   { name: "JavaScript", category: "Language", logo: logo("javascript") },
   { name: "Git", category: "Tooling", logo: logo("git") },
   { name: "GitHub", category: "Tooling", logo: logo("github") },

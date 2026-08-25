@@ -8,7 +8,7 @@ export default function SkillsMarquee() {
   return (
     <div className="mt-20 space-y-5 border-y border-border/60 py-8">
       <div className="edge-fade overflow-hidden">
-        <div className="marquee-track marquee-left" style={{ "--marquee-duration": "48s" } as React.CSSProperties}>
+        <div className="marquee-track marquee-left" style={{ "--marquee-duration": "24s" } as React.CSSProperties}>
           {names.map((name, i) => (
             <span key={`${name}-${i}`} className="flex items-center whitespace-nowrap px-6">
               <span className="text-lg font-medium text-muted-foreground sm:text-xl">{name}</span>
@@ -19,7 +19,7 @@ export default function SkillsMarquee() {
       </div>
 
       <div className="edge-fade overflow-hidden">
-        <div className="marquee-track marquee-right" style={{ "--marquee-duration": "42s" } as React.CSSProperties}>
+        <div className="marquee-track marquee-right" style={{ "--marquee-duration": "21s" } as React.CSSProperties}>
           {logos.map((skill, i) => (
             <span key={`${skill.name}-${i}`} className="px-7">
               <img
