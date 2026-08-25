@@ -72,22 +72,52 @@ export default function AgentChat() {
             <p className="text-xs text-muted-foreground">Ask about Azka, her skills and projects</p>
           </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-3">
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={
-                  m.role === "user"
-                    ? "ml-auto max-w-[85%] rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground"
-                    : "mr-auto max-w-[85%] rounded-lg bg-secondary px-3 py-2 text-sm text-secondary-foreground"
-                }
+                className={`flex gap-2 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
               >
-                {m.content}
+                {/* Avatar */}
+                <div className="shrink-0 pt-0.5">
+                  {m.role === "user" ? (
+                    <img 
+                      src="/assets/user-avatar.jpg" 
+                      alt="User" 
+                      className="h-7 w-7 rounded-full object-cover border border-border"
+                    />
+                  ) : (
+                    <img 
+                      src="/assets/robot-avatar.jpg" 
+                      alt="Agent" 
+                      className="h-8 w-8 rounded-full object-cover animate-float-robo"
+                    />
+                  )}
+                </div>
+                {/* Message Bubble */}
+                <div
+                  className={
+                    m.role === "user"
+                      ? "max-w-[80%] rounded-lg rounded-tr-none bg-primary px-3 py-2 text-sm text-primary-foreground"
+                      : "max-w-[80%] rounded-lg rounded-tl-none bg-secondary border border-border/50 px-3 py-2 text-sm text-secondary-foreground shadow-sm"
+                  }
+                >
+                  {m.content}
+                </div>
               </div>
             ))}
             {busy && (
-              <div className="mr-auto rounded-lg bg-secondary px-3 py-2 text-sm text-muted-foreground">
-                Typing...
+              <div className="flex gap-2 flex-row">
+                <div className="shrink-0 pt-0.5">
+                  <img src="/assets/robot-avatar.jpg" alt="Agent typing" className="h-8 w-8 rounded-full object-cover animate-float-robo" />
+                </div>
+                <div className="max-w-[80%] rounded-lg rounded-tl-none bg-secondary border border-border/50 px-3 py-2 text-sm text-muted-foreground shadow-sm flex items-center">
+                  <span className="flex gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </span>
+                </div>
               </div>
             )}
           </div>
