@@ -60,7 +60,7 @@ export const skillNames = [
 ];
 
 // Logos come from simpleicons CDN, tinted with the brand red.
-const logo = (slug: string) => `https://cdn.simpleicons.org/${slug}/e63946`;
+const logo = (slug: string) => `https://cdn.simpleicons.org/${slug}/e63946?v=2`;
 
 export type Skill = { name: string; category: string; logo: string };
 
@@ -125,12 +125,11 @@ export const projects: Project[] = [
 
 export const contact = {
   address: "Karachi, Pakistan",
-  phone: "+92 XXX XXXXXXX",
-  email: "hello@example.com",
+  email: "azkaazeem@example.com",
   socials: [
-    { name: "LinkedIn", url: "https://linkedin.com" },
-    { name: "GitHub", url: "https://github.com" },
-    { name: "Instagram", url: "https://instagram.com" },
+    { name: "LinkedIn", url: "https://www.linkedin.com/in/azkaazeem/" },
+    { name: "GitHub", url: "https://github.com/Azkaazeem" },
+    { name: "Reddit", url: "https://www.reddit.com/user/Azkaazeem804/" },
   ],
 };
 
