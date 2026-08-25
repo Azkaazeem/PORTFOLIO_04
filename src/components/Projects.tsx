@@ -8,8 +8,8 @@ export default function Projects() {
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { clientWidth, scrollLeft } = scrollRef.current;
-      // Scroll by mostly one screen width, leaving a bit of context
-      const scrollAmount = direction === "left" ? -(clientWidth * 0.8) : (clientWidth * 0.8);
+      // Scroll by exactly one page, snap will handle alignment
+      const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
       scrollRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: "smooth" });
     }
   };
@@ -52,16 +52,16 @@ export default function Projects() {
         {projects.map((project, i) => (
           <div 
             key={i} 
-            className="group relative w-[85vw] max-w-[400px] shrink-0 snap-center overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary hover:shadow-glow-soft"
+            className="group relative w-[100%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary hover:shadow-glow-soft"
           >
-            <div className="relative aspect-[4/3] overflow-hidden">
+            <div className="relative aspect-video overflow-hidden bg-muted/20 flex items-center justify-center p-2">
               <img
                 src={project.image}
                 alt={`${project.name} screenshot`}
                 loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-background/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-4">
+              <div className="absolute inset-0 bg-background/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-4 z-10">
                 <a 
                   href={project.url} 
                   target="_blank" 
