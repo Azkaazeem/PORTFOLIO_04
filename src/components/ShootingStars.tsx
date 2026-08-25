@@ -96,9 +96,9 @@ export default function ShootingStars({ direction = "top-left" }: ShootingStarsP
       
       stars.push({
         x, y,
-        length: Math.random() * 100 + 40,
-        speed: Math.random() * 6 + 6,
-        opacity: Math.random() * 0.6 + 0.4,
+        length: Math.random() * 120 + 80,
+        speed: Math.random() * 8 + 8,
+        opacity: Math.random() * 0.5 + 0.7,
         life: 0,
         maxLife: Math.random() * 150 + 50,
         dx: fdx,
@@ -112,7 +112,7 @@ export default function ShootingStars({ direction = "top-left" }: ShootingStarsP
       ctx.clearRect(0, 0, w, h);
       
       // Spawn chance
-      if (Math.random() < 0.05) { 
+      if (Math.random() < 0.1) { 
         spawnStar();
       }
       
@@ -131,16 +131,22 @@ export default function ShootingStars({ direction = "top-left" }: ShootingStarsP
         
         ctx.beginPath();
         const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
-        grad.addColorStop(0, `rgba(255, 255, 255, ${currentOpacity})`); // bright white/red head
-        grad.addColorStop(0.1, `rgba(${s.color}, ${currentOpacity * 0.8})`); 
+        grad.addColorStop(0, `rgba(255, 255, 255, ${Math.min(1, currentOpacity)})`); // bright white head
+        grad.addColorStop(0.05, `rgba(${s.color}, ${Math.min(1, currentOpacity)})`); 
         grad.addColorStop(1, `rgba(${s.color}, 0)`); // faded tail
         
         ctx.strokeStyle = grad;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 4.5;
         ctx.lineCap = "round";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `rgba(${s.color}, 0.8)`;
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(tailX, tailY);
         ctx.stroke();
+        
+        // Reset shadow for next frame optimizations if needed, but we clearRect anyway so it's fine 
+        // wait, shadow affects the line. Let's reset it to be safe.
+        ctx.shadowBlur = 0;
       }
       
       stars = stars.filter(s => s.life < s.maxLife && s.x > -150 && s.x < w + 150 && s.y > -150 && s.y < h + 150);
