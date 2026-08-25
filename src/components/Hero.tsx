@@ -116,7 +116,7 @@ export default function Hero() {
       {/* Bottom wave transition into About */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0">
         <div className="wave-anim w-[200%]">
-          <svg viewBox="0 0 2880 120" className="h-16 w-full sm:h-24" preserveAspectRatio="none">
+          <svg viewBox="0 0 2880 120" className="h-24 w-full sm:h-32" preserveAspectRatio="none">
             <path
               d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 C1680,110 1920,10 2160,60 C2400,110 2640,10 2880,60 L2880,120 L0,120 Z"
               fill="var(--surface)"
@@ -125,8 +125,8 @@ export default function Hero() {
               d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 C1680,110 1920,10 2160,60 C2400,110 2640,10 2880,60"
               fill="none"
               stroke="var(--primary)"
-              strokeWidth="2"
-              opacity="0.5"
+              strokeWidth="5"
+              opacity="0.9"
             />
           </svg>
         </div>

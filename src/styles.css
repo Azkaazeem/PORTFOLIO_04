@@ -97,11 +97,33 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Make sure links and buttons also hide cursor */
+  a, button, input, textarea, select, [role="button"] {
+    cursor: none;
   }
 
   ::selection {
     background: var(--primary);
     color: var(--primary-foreground);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--glow);
   }
 }
 
@@ -221,7 +243,7 @@
 }
 
 .wave-anim {
-  animation: wave-shift var(--wave-duration, 18s) linear infinite;
+  animation: wave-shift var(--wave-duration, 8s) linear infinite;
 }
 
 /* Lightning sweep for the profile image hover */

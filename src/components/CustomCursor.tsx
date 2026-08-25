@@ -65,8 +65,8 @@ export default function CustomCursor() {
     const render = () => {
       let prev = pos;
       points.forEach((p, i) => {
-        p.x += (prev.x - p.x) * 0.32;
-        p.y += (prev.y - p.y) * 0.32;
+        p.x += (prev.x - p.x) * 0.15;
+        p.y += (prev.y - p.y) * 0.15;
         const node = trail.current[i];
         if (node) {
           const scale = (1 - i / TRAIL) * (hovering ? 1.7 : 1);
@@ -107,10 +107,10 @@ export default function CustomCursor() {
           }}
           className="absolute left-0 top-0 rounded-full mix-blend-screen"
           style={{
-            height: 26,
-            width: 26,
-            opacity: (1 - i / TRAIL) * 0.35,
-            filter: `blur(${6 + i}px)`,
+            height: 24,
+            width: 24,
+            opacity: (1 - i / TRAIL) * 0.15,
+            filter: `blur(${4 + i * 1.5}px)`,
             transition: "background-color 500ms ease",
           }}
         />
