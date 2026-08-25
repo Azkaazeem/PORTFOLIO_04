@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 const TRAIL = 14;
 
-// Custom cursor effect — glowing blob with a soft color-reactive smoke trail.
+// Custom cursor effect — glowing blob with a soft color-reactive smoke trail + global interactive sparkles.
 export default function CustomCursor() {
   const dot = useRef<HTMLDivElement | null>(null);
   const trail = useRef<HTMLDivElement[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -24,6 +25,27 @@ export default function CustomCursor() {
     let raf = 0;
     let lastSample = 0;
 
+    // Canvas setup for global sparkles
+    const canvas = canvasRef.current;
+    let ctxCanvas: CanvasRenderingContext2D | null = null;
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    let particles: {x: number, y: number, r: number, vx: number, vy: number, life: number}[] = [];
+
+    if (canvas) {
+      ctxCanvas = canvas.getContext("2d");
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    const onResize = () => {
+      if (canvas) {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+    };
+    window.addEventListener("resize", onResize);
+
     const isRedish = (color: string) => {
       const m = color.match(/\d+(\.\d+)?/g);
       if (!m || m.length < 3) return false;
@@ -32,7 +54,6 @@ export default function CustomCursor() {
       const b = Number(m[2]);
       return r > 90 && r > g * 1.6 && r > b * 1.6;
     };
-
 
     // Sample what is under the cursor to flip the smoke color
     const sample = (x: number, y: number) => {
@@ -60,9 +81,24 @@ export default function CustomCursor() {
         lastSample = now;
         sample(e.clientX, e.clientY);
       }
+      
+      // Spawn sparkles on pointer move
+      if (ctxCanvas) {
+        for(let i=0; i<2; i++) {
+          particles.push({
+            x: pos.x + (Math.random() - 0.5) * 20,
+            y: pos.y + (Math.random() - 0.5) * 20,
+            r: Math.random() * 2 + 0.5,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            life: 1
+          });
+        }
+      }
     };
 
     const render = () => {
+      // Trail rendering
       let prev = pos;
       points.forEach((p, i) => {
         p.x += (prev.x - p.x) * 0.15;
@@ -83,6 +119,24 @@ export default function CustomCursor() {
         dot.current.style.backgroundColor = onRed ? "var(--foreground)" : "var(--primary)";
       }
 
+      // Sparkles canvas rendering
+      if (ctxCanvas) {
+        ctxCanvas.clearRect(0, 0, w, h);
+        for(let i=0; i<particles.length; i++) {
+          let p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= 0.02;
+          ctxCanvas.globalAlpha = Math.max(0, p.life);
+          ctxCanvas.fillStyle = onRed ? "oklch(0.97 0.002 285)" : "oklch(0.58 0.222 25.5)"; // White if on red, otherwise primary red
+          ctxCanvas.beginPath();
+          ctxCanvas.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctxCanvas.fill();
+        }
+        particles = particles.filter(p => p.life > 0);
+        ctxCanvas.globalAlpha = 1;
+      }
+
       raf = requestAnimationFrame(render);
     };
 
@@ -91,6 +145,7 @@ export default function CustomCursor() {
 
     return () => {
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
     };
   }, [enabled]);
@@ -99,6 +154,7 @@ export default function CustomCursor() {
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-[90] hidden md:block">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-80" />
       {Array.from({ length: TRAIL }).map((_, i) => (
         <div
           key={i}

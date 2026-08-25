@@ -125,7 +125,7 @@ export default function Hero() {
               d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 C1680,110 1920,10 2160,60 C2400,110 2640,10 2880,60"
               fill="none"
               stroke="var(--primary)"
-              strokeWidth="5"
+              strokeWidth="3"
               opacity="0.9"
             />
           </svg>

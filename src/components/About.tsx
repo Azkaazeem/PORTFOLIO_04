@@ -28,33 +28,12 @@ export default function About() {
     };
     window.addEventListener("resize", onResize);
 
-    let mouse = { x: -1000, y: -1000 };
-    const onMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-      // Spawn particles on hover
-      for(let i=0; i<3; i++) {
-        particles.push({
-          x: mouse.x + (Math.random() - 0.5) * 30,
-          y: mouse.y + (Math.random() - 0.5) * 30,
-          r: Math.random() * 2 + 0.5,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
-          life: 1
-        });
-      }
-    };
-    const onLeave = () => { mouse.x = -1000; mouse.y = -1000; };
-    canvas.addEventListener("mousemove", onMove);
-    canvas.addEventListener("mouseleave", onLeave);
-
     let rafId: number;
     const render = () => {
       ctxCanvas.clearRect(0, 0, w, h);
       
       // Random ambient sparkles
-      if (Math.random() < 0.3) {
+      if (Math.random() < 0.6) { // Increased spawn rate
         particles.push({
           x: Math.random() * w,
           y: Math.random() * h,
@@ -85,8 +64,6 @@ export default function About() {
 
     return () => {
       window.removeEventListener("resize", onResize);
-      canvas.removeEventListener("mousemove", onMove);
-      canvas.removeEventListener("mouseleave", onLeave);
       cancelAnimationFrame(rafId);
     };
   }, []);
