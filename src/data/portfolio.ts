@@ -5,6 +5,12 @@ import project3 from "@/assets/project-3.jpg";
 import project4 from "@/assets/project-4.jpg";
 import project5 from "@/assets/project-5.jpg";
 import certImage from "@/assets/cert-placeholder.jpg";
+import cert1 from "@/assets/1.jpg";
+import cert2 from "@/assets/2.jpg";
+import cert3 from "@/assets/3.jpg";
+import cert4 from "@/assets/4.jpg";
+import cert5 from "@/assets/5.jpg";
+import cert6 from "@/assets/6.jpg";
 
 export const navItems = [
   { label: "Home", id: "home" },
@@ -77,6 +83,8 @@ export const skills: Skill[] = [
   { name: "Figma", category: "Design", logo: logo("figma") },
 ];
 
+
+
 export type Certification = {
   title: string;
   issuer: string;
@@ -84,15 +92,12 @@ export type Certification = {
 };
 
 export const certifications: Certification[] = [
-  { title: "Introduction to Modern AI", issuer: "Cisco Networking Academy", image: certImage },
-  { title: "JavaScript Essentials 1", issuer: "Cisco Networking Academy", image: certImage },
-  { title: "JavaScript Essentials 2", issuer: "Cisco Networking Academy", image: certImage },
-  { title: "CSS Essentials", issuer: "Web Development Course", image: certImage },
-  { title: "HTML & Web Development", issuer: "Web Development Course", image: certImage },
-  { title: "Certificate of Appreciation", issuer: "Academy Recognition", image: certImage },
-  { title: "Training Completion", issuer: "Development Training Program", image: certImage },
-  { title: "Prompt Engineering Basics", issuer: "Online Learning", image: certImage },
-  { title: "Graphic Design Fundamentals", issuer: "Design Course", image: certImage },
+  { title: "Techno Kids (Batch-6)", issuer: "Saylani Mass Training Programme", image: cert1 },
+  { title: "Introduction to Modern AI", issuer: "Cisco Networking Academy", image: cert2 },
+  { title: "HTML Essentials", issuer: "Cisco Networking Academy", image: cert6 },
+  { title: "CSS Essentials", issuer: "Cisco Networking Academy", image: cert5 },
+  { title: "JavaScript Essentials 1", issuer: "Cisco Networking Academy", image: cert4 },
+  { title: "JavaScript Essentials 2", issuer: "Cisco Networking Academy", image: cert3 },
 ];
 
 export type Project = {
