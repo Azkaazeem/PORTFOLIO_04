@@ -3,70 +3,13 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import profile from "@/assets/profile.png";
 import { bioParagraphs } from "@/data/portfolio";
+import ShootingStars from "@/components/ShootingStars";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
   const root = useRef<HTMLElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [hover, setHover] = useState(false);
-
-  // Canvas Sparkles Effect
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctxCanvas = canvas.getContext("2d");
-    if (!ctxCanvas) return;
-
-    let w = canvas.width = canvas.offsetWidth;
-    let h = canvas.height = canvas.offsetHeight;
-    let particles: {x: number, y: number, r: number, vx: number, vy: number, life: number}[] = [];
-
-    const onResize = () => {
-      w = canvas.width = canvas.offsetWidth;
-      h = canvas.height = canvas.offsetHeight;
-    };
-    window.addEventListener("resize", onResize);
-
-    let rafId: number;
-    const render = () => {
-      ctxCanvas.clearRect(0, 0, w, h);
-      
-      // Random ambient sparkles
-      if (Math.random() < 0.6) { // Increased spawn rate
-        particles.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          r: Math.random() * 1.5 + 0.5,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: -Math.random() * 0.5 - 0.2, // float up
-          life: 1
-        });
-      }
-      
-      for(let i=0; i<particles.length; i++) {
-        let p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.015;
-        ctxCanvas.globalAlpha = Math.max(0, p.life);
-        ctxCanvas.fillStyle = "oklch(0.58 0.222 25.5)"; // primary red
-        ctxCanvas.beginPath();
-        ctxCanvas.arc(p.x, p.y, p.r, 0, Math.PI*2);
-        ctxCanvas.fill();
-      }
-      particles = particles.filter(p => p.life > 0);
-      ctxCanvas.globalAlpha = 1;
-      
-      rafId = requestAnimationFrame(render);
-    };
-    render();
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
 
   // Bio scroll reveal with pinned section
   useEffect(() => {
@@ -106,12 +49,7 @@ export default function About() {
 
   return (
     <section id="about" ref={root} className="relative bg-surface min-h-screen flex items-center py-24 sm:py-28 overflow-hidden">
-      {/* Background Sparkles Canvas */}
-      <canvas 
-        ref={canvasRef} 
-        className="absolute inset-0 z-0 h-full w-full pointer-events-auto"
-        style={{ cursor: "none" }}
-      />
+      <ShootingStars direction="top-left" />
       
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
         {/* Profile image with lightning hover */}

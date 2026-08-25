@@ -1,5 +1,6 @@
 import { Github, Instagram, Linkedin, Mail, MapPin, Phone, Share2 } from "lucide-react";
 import { contact } from "@/data/portfolio";
+import ShootingStars from "@/components/ShootingStars";
 
 const socialIcons = { LinkedIn: Linkedin, GitHub: Github, Instagram: Instagram } as const;
 
@@ -12,6 +13,7 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative overflow-hidden bg-surface py-16 sm:py-24 lg:py-28">
+      <ShootingStars direction="top-right" />
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
         <div className="relative z-10 min-w-0">
           <p className="section-label text-[0.62rem] sm:text-[0.72rem]">Contact</p>
