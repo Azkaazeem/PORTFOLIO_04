@@ -97,12 +97,10 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     overflow-x: hidden;
-    cursor: none;
   }
 
   /* Make sure links and buttons also hide cursor */
   a, button, input, textarea, select, [role="button"] {
-    cursor: none;
   }
 
   ::selection {
