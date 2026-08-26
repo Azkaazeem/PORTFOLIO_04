@@ -99,6 +99,10 @@
     overflow-x: hidden;
   }
 
+  .hide-cursor, .hide-cursor * {
+    cursor: none !important;
+  }
+
   /* Make sure links and buttons also hide cursor */
   a, button, input, textarea, select, [role="button"] {
   }

@@ -14,6 +14,8 @@ const GREETING: Msg = {
 // Floating chat widget powered by Lovable AI (key stays server-side).
 export default function AgentChat() {
   const [open, setOpen] = useState(false);
+  const [showHintBox, setShowHintBox] = useState(true);
+  const [isHiding, setIsHiding] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -55,14 +57,60 @@ export default function AgentChat() {
 
   return (
     <>
+      {showHintBox && !open && (
+        <div 
+          className={`fixed bottom-24 right-5 z-[80] flex items-center gap-3 rounded-xl border border-primary/20 bg-background/95 backdrop-blur-md p-3 shadow-glow w-[280px] cursor-pointer transition-all duration-500 ${isHiding ? 'opacity-0 translate-y-4 scale-95 pointer-events-none' : 'opacity-100 translate-y-0 scale-100 animate-float-robo animate-in fade-in slide-in-from-bottom-5'}`} 
+          onClick={() => { 
+            setIsHiding(true);
+            setTimeout(() => {
+              setOpen(true); 
+              setShowHintBox(false);
+            }, 300);
+          }}
+        >
+           {/* robot image */}
+           <div className="shrink-0">
+             <img src="/assets/robot-avatar.jpg" alt="Agent" className="h-12 w-12 rounded-full object-cover shadow-sm" />
+           </div>
+           
+           {/* text */}
+           <div className="flex-1 pr-4">
+             <p className="font-display tracking-wide text-primary text-sm">AZKA'S AGENT</p>
+             <p className="text-muted-foreground text-xs leading-tight mt-0.5">Click here to ask anything about Azka, her skills or projects.</p>
+           </div>
+           
+           {/* close button */}
+           <button 
+             onClick={(e) => {
+               e.stopPropagation();
+               setIsHiding(true);
+               setTimeout(() => setShowHintBox(false), 300);
+             }}
+             className="absolute top-2 right-2 text-muted-foreground hover:text-primary transition-colors"
+             aria-label="Close hint box"
+           >
+             <X className="h-4 w-4" />
+           </button>
+           
+           {/* pointing arrow to the button */}
+           <div className="absolute -bottom-2 right-6 h-4 w-4 rotate-45 border-b border-r border-primary/20 bg-background/95 backdrop-blur-md"></div>
+        </div>
+      )}
+
       {/* 3. Yahan import nahi likhna, direct button start karein */}
       <button 
         style={{ backgroundImage: `url(${aiChat})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => { 
+          setIsHiding(true);
+          setTimeout(() => {
+            setOpen((v) => !v); 
+            setShowHintBox(false);
+          }, 150);
+        }}
         aria-label={open ? "Close chat" : "Chat with Azka's Agent"}
         className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform hover:scale-105"
       >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        {open ? <X className="h-6 w-6 bg-primary/80 rounded-full p-1" /> : null}
       </button>
 
       {open && (

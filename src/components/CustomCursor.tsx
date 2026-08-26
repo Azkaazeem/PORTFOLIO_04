@@ -17,6 +17,7 @@ export default function CustomCursor() {
 
   useEffect(() => {
     if (!enabled) return;
+    document.documentElement.classList.add("hide-cursor");
 
     const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     const points = Array.from({ length: TRAIL }, () => ({ ...pos }));
@@ -81,20 +82,6 @@ export default function CustomCursor() {
         lastSample = now;
         sample(e.clientX, e.clientY);
       }
-      
-      // Spawn sparkles on pointer move
-      if (ctxCanvas) {
-        for(let i=0; i<2; i++) {
-          particles.push({
-            x: pos.x + (Math.random() - 0.5) * 20,
-            y: pos.y + (Math.random() - 0.5) * 20,
-            r: Math.random() * 2 + 0.5,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
-            life: 1
-          });
-        }
-      }
     };
 
     const render = () => {
@@ -121,12 +108,24 @@ export default function CustomCursor() {
 
       // Sparkles canvas rendering
       if (ctxCanvas) {
+        // Continuously emit sparkles even when stationary
+        for(let i=0; i<3; i++) { // Spawn 3 particles per frame
+          particles.push({
+            x: pos.x + (Math.random() - 0.5) * 40,
+            y: pos.y + (Math.random() - 0.5) * 40,
+            r: Math.random() * 2.5 + 0.5,
+            vx: (Math.random() - 0.5) * 3,
+            vy: (Math.random() - 0.5) * 3,
+            life: 1
+          });
+        }
+
         ctxCanvas.clearRect(0, 0, w, h);
         for(let i=0; i<particles.length; i++) {
           let p = particles[i];
           p.x += p.vx;
           p.y += p.vy;
-          p.life -= 0.02;
+          p.life -= 0.02; // Sparkle lifetime
           ctxCanvas.globalAlpha = Math.max(0, p.life);
           ctxCanvas.fillStyle = onRed ? "oklch(0.97 0.002 285)" : "oklch(0.58 0.222 25.5)"; // White if on red, otherwise primary red
           ctxCanvas.beginPath();
@@ -144,6 +143,7 @@ export default function CustomCursor() {
     raf = requestAnimationFrame(render);
 
     return () => {
+      document.documentElement.classList.remove("hide-cursor");
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
@@ -163,17 +163,17 @@ export default function CustomCursor() {
           }}
           className="absolute left-0 top-0 rounded-full mix-blend-screen"
           style={{
-            height: 24,
-            width: 24,
-            opacity: (1 - i / TRAIL) * 0.15,
-            filter: `blur(${4 + i * 1.5}px)`,
+            height: 36,
+            width: 36,
+            opacity: (1 - i / TRAIL) * 0.2,
+            filter: `blur(${6 + i * 1.5}px)`,
             transition: "background-color 500ms ease",
           }}
         />
       ))}
       <div
         ref={dot}
-        className="absolute left-0 top-0 h-2.5 w-2.5 rounded-full"
+        className="absolute left-0 top-0 h-4 w-4 rounded-full"
         style={{ transition: "background-color 400ms ease" }}
       />
     </div>
