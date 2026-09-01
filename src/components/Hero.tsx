@@ -58,7 +58,9 @@ export default function Hero() {
 
             <a
               href={cvUrl}
-              download
+              download="azka_azeem_simple_cv.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow-soft transition-transform duration-300 hover:-translate-y-0.5"
             >
               <ArrowDownToLine className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />

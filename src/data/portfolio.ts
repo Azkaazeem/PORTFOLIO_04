@@ -15,6 +15,7 @@ import proj7 from "@/assets/Projects/07- Authentication & Authorization.png";
 import proj8 from "@/assets/Projects/08- Synth.png";
 import proj9 from "@/assets/Projects/09- Imtiaz Clone.png";
 import proj10 from "@/assets/Projects/10- Pet Accessories.png";
+import cvPdf from "@/assets/azka_azeem_simple_cv.pdf";
 
 export const navItems = [
   { label: "Home", id: "home" },
@@ -133,4 +134,4 @@ export const contact = {
   ],
 };
 
-export const cvUrl = "/azka-azeem-cv.pdf";
+export const cvUrl = cvPdf;
