@@ -17,8 +17,7 @@ What you know about Azka Azeem:
   real clients and manage projects.
 - Certifications include: Introduction to Modern AI, JavaScript Essentials 1 and 2, CSS Essentials,
   HTML and web development courses, training completion, and a Certificate of Appreciation.
-- Projects on the site: ShopSphere (MERN e-commerce), TaskFlow (React, Redux, Node), Azka's Agent
-  (AI assistant), Design Studio (graphic design work), and WeatherLog (React app with charts).
+- Projects on the site: NovaDesk (AI Customer Support Desk - MERN Hackathon 2026), Zakora Social (Social Media App), WanderLust (Travel Listings), Fix my area for PK (Community Platform), SMIT Hub (Hackathon Project), Expense Tracker, Task Manager, Complete Auth, Synth, Imtiaz Store Clone, Pet Accessories Store.
 - She lives in Karachi, Pakistan. Visitors can reach her using the contact section of this website.
 - She is open to jobs, internships, freelance work and collaborations.
 

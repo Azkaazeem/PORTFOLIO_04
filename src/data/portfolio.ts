@@ -5,6 +5,7 @@ import cert4 from "@/assets/Certificates/4.jpg";
 import cert5 from "@/assets/Certificates/5.jpg";
 import cert6 from "@/assets/Certificates/6.jpg";
 
+import proj11 from "@/assets/Projects/11- Novadesk.png";
 import proj1 from "@/assets/Projects/01- Zakora.png";
 import proj2 from "@/assets/Projects/02- WanderLust.png";
 import proj3 from "@/assets/Projects/03- Fix My Area.png";
@@ -112,6 +113,13 @@ export type Project = {
 };
 
 export const projects: Project[] = [
+  {
+    name: "NovaDesk",
+    tech: "AI Customer Support Desk",
+    image: proj11,
+    url: "https://mern-final-hackathon-2026-oqir.vercel.app/",
+    github: "https://github.com/Azkaazeem/MERN_FINAL_HACKATHON_2026",
+  },
   { name: "Zakora Social", tech: "Social Media App", image: proj1, url: "https://social-media-app-frontend-sand.vercel.app/", github: "https://github.com/Azkaazeem/SOCIAL_MEDIA_APP_FRONTEND" },
   { name: "WanderLust", tech: "Travel Listings", image: proj2, url: "https://delta-project-chmye3djs-azka-azeems-projects.vercel.app/listings", github: "https://github.com/Azkaazeem/DELTA_PROJECT" },
   { name: "Fix my area for PK", tech: "Community Platform", image: proj3, url: "https://fix-my-area-for-pk-xsl7.vercel.app/", github: "https://github.com/Azkaazeem/Fix-My-Area-For-PK" },
