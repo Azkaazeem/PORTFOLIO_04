@@ -120,7 +120,7 @@ export const projects: Project[] = [
     url: "https://mern-final-hackathon-2026-oqir.vercel.app/",
     github: "https://github.com/Azkaazeem/MERN_FINAL_HACKATHON_2026",
   },
-  { name: "Zakora Social", tech: "Social Media App", image: proj1, url: "https://social-media-app-frontend-sand.vercel.app/", github: "https://github.com/Azkaazeem/SOCIAL_MEDIA_APP_FRONTEND" },
+  { name: "Zakora Social", tech: "Social Media App", image: proj1, url: "https://social-media-app-frontend-zakora.vercel.app/", github: "https://github.com/Azkaazeem/SOCIAL_MEDIA_APP_FRONTEND" },
   { name: "WanderLust", tech: "Travel Listings", image: proj2, url: "https://delta-project-chmye3djs-azka-azeems-projects.vercel.app/listings", github: "https://github.com/Azkaazeem/DELTA_PROJECT" },
   { name: "Fix my area for PK", tech: "Community Platform", image: proj3, url: "https://fix-my-area-for-pk-xsl7.vercel.app/", github: "https://github.com/Azkaazeem/Fix-My-Area-For-PK" },
   { name: "SMIT Hub", tech: "Hackathon Project", image: proj4, url: "https://module-03-hackathon.vercel.app/", github: "https://github.com/Azkaazeem/MODULE03_HACKATHON" },
