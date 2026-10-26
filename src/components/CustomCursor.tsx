@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-const TRAIL = 14;
-
-// Custom cursor effect — glowing blob with a soft color-reactive smoke trail + global interactive sparkles.
+// Sleek, high-performance custom cursor — luxury trailing ring + precision center dot
 export default function CustomCursor() {
-  const dot = useRef<HTMLDivElement | null>(null);
-  const trail = useRef<HTMLDivElement[]>([]);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const dotRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -19,33 +16,13 @@ export default function CustomCursor() {
     if (!enabled) return;
     document.documentElement.classList.add("hide-cursor");
 
-    const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const points = Array.from({ length: TRAIL }, () => ({ ...pos }));
-    let hovering = false;
+    const mouse = { x: -100, y: -100 };
+    const ring = { x: -100, y: -100 };
+    let isHovering = false;
+    let isClicking = false;
     let onRed = false;
     let raf = 0;
     let lastSample = 0;
-
-    // Canvas setup for global sparkles
-    const canvas = canvasRef.current;
-    let ctxCanvas: CanvasRenderingContext2D | null = null;
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-    let particles: {x: number, y: number, r: number, vx: number, vy: number, life: number}[] = [];
-
-    if (canvas) {
-      ctxCanvas = canvas.getContext("2d");
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-
-    const onResize = () => {
-      if (canvas) {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      }
-    };
-    window.addEventListener("resize", onResize);
 
     const isRedish = (color: string) => {
       const m = color.match(/\d+(\.\d+)?/g);
@@ -53,14 +30,13 @@ export default function CustomCursor() {
       const r = Number(m[0]);
       const g = Number(m[1]);
       const b = Number(m[2]);
-      return r > 90 && r > g * 1.6 && r > b * 1.6;
+      return r > 120 && r > g * 1.5 && r > b * 1.5;
     };
 
-    // Sample what is under the cursor to flip the smoke color
     const sample = (x: number, y: number) => {
       const el = document.elementFromPoint(x, y) as HTMLElement | null;
       if (!el) return;
-      hovering = !!el.closest("button, a, img, [data-cursor-hover]");
+      isHovering = !!el.closest("button, a, input, textarea, select, [role='button'], [data-cursor-hover]");
       let node: HTMLElement | null = el;
       let red = false;
       for (let i = 0; i < 4 && node; i++) {
@@ -75,77 +51,53 @@ export default function CustomCursor() {
     };
 
     const onMove = (e: PointerEvent) => {
-      pos.x = e.clientX;
-      pos.y = e.clientY;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
       const now = performance.now();
-      if (now - lastSample > 120) {
+      if (now - lastSample > 80) {
         lastSample = now;
         sample(e.clientX, e.clientY);
       }
     };
 
-    const render = () => {
-      // Trail rendering
-      let prev = pos;
-      points.forEach((p, i) => {
-        p.x += (prev.x - p.x) * 0.15;
-        p.y += (prev.y - p.y) * 0.15;
-        const node = trail.current[i];
-        if (node) {
-          const scale = (1 - i / TRAIL) * (hovering ? 1.7 : 1);
-          node.style.transform = `translate3d(${p.x}px, ${p.y}px, 0) translate(-50%, -50%) scale(${scale})`;
-          node.style.backgroundColor = onRed ? "var(--background)" : "var(--primary)";
-        }
-        prev = p;
-      });
+    const onMouseDown = () => { isClicking = true; };
+    const onMouseUp = () => { isClicking = false; };
 
-      if (dot.current) {
-        dot.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%) scale(${
-          hovering ? 2.1 : 1
-        })`;
-        dot.current.style.backgroundColor = onRed ? "var(--foreground)" : "var(--primary)";
+    const render = () => {
+      // Smooth lerp for trailing ring
+      ring.x += (mouse.x - ring.x) * 0.22;
+      ring.y += (mouse.y - ring.y) * 0.22;
+
+      // Update ring
+      if (ringRef.current) {
+        const scale = isClicking ? 0.8 : isHovering ? 1.6 : 1;
+        ringRef.current.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%) scale(${scale})`;
+        ringRef.current.style.borderColor = onRed ? "rgba(255, 255, 255, 0.7)" : "var(--primary)";
+        ringRef.current.style.backgroundColor = isHovering
+          ? onRed ? "rgba(255, 255, 255, 0.15)" : "oklch(0.58 0.222 25.5 / 15%)"
+          : "transparent";
       }
 
-      // Sparkles canvas rendering
-      if (ctxCanvas) {
-        // Continuously emit sparkles even when stationary
-        for(let i=0; i<3; i++) { // Spawn 3 particles per frame
-          particles.push({
-            x: pos.x + (Math.random() - 0.5) * 40,
-            y: pos.y + (Math.random() - 0.5) * 40,
-            r: Math.random() * 2.5 + 0.5,
-            vx: (Math.random() - 0.5) * 3,
-            vy: (Math.random() - 0.5) * 3,
-            life: 1
-          });
-        }
-
-        ctxCanvas.clearRect(0, 0, w, h);
-        for(let i=0; i<particles.length; i++) {
-          let p = particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          p.life -= 0.02; // Sparkle lifetime
-          ctxCanvas.globalAlpha = Math.max(0, p.life);
-          ctxCanvas.fillStyle = onRed ? "oklch(0.97 0.002 285)" : "oklch(0.58 0.222 25.5)"; // White if on red, otherwise primary red
-          ctxCanvas.beginPath();
-          ctxCanvas.arc(p.x, p.y, p.r, 0, Math.PI*2);
-          ctxCanvas.fill();
-        }
-        particles = particles.filter(p => p.life > 0);
-        ctxCanvas.globalAlpha = 1;
+      // Update center dot
+      if (dotRef.current) {
+        const dotScale = isClicking ? 1.4 : isHovering ? 0.6 : 1;
+        dotRef.current.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0) translate(-50%, -50%) scale(${dotScale})`;
+        dotRef.current.style.backgroundColor = onRed ? "#ffffff" : "var(--primary)";
       }
 
       raf = requestAnimationFrame(render);
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
     raf = requestAnimationFrame(render);
 
     return () => {
       document.documentElement.classList.remove("hide-cursor");
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
       cancelAnimationFrame(raf);
     };
   }, [enabled]);
@@ -153,28 +105,18 @@ export default function CustomCursor() {
   if (!enabled) return null;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[90] hidden md:block">
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-80" />
-      {Array.from({ length: TRAIL }).map((_, i) => (
-        <div
-          key={i}
-          ref={(node) => {
-            if (node) trail.current[i] = node;
-          }}
-          className="absolute left-0 top-0 rounded-full mix-blend-screen"
-          style={{
-            height: 36,
-            width: 36,
-            opacity: (1 - i / TRAIL) * 0.2,
-            filter: `blur(${6 + i * 1.5}px)`,
-            transition: "background-color 500ms ease",
-          }}
-        />
-      ))}
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[9999] hidden md:block overflow-hidden">
+      {/* Trailing halo ring */}
       <div
-        ref={dot}
-        className="absolute left-0 top-0 h-4 w-4 rounded-full"
-        style={{ transition: "background-color 400ms ease" }}
+        ref={ringRef}
+        className="absolute left-0 top-0 h-9 w-9 rounded-full border border-primary/50 transition-[border-color,background-color] duration-200 ease-out shadow-[0_0_12px_rgba(230,57,70,0.25)]"
+        style={{ willChange: "transform" }}
+      />
+      {/* Precision center dot */}
+      <div
+        ref={dotRef}
+        className="absolute left-0 top-0 h-2 w-2 rounded-full shadow-[0_0_8px_var(--primary)] transition-transform duration-75 ease-out"
+        style={{ willChange: "transform" }}
       />
     </div>
   );

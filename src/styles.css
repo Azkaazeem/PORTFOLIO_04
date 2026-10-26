@@ -218,6 +218,24 @@
   );
 }
 
+/* Subtle background textures for modern depth */
+.bg-grid-subtle {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-dots-subtle {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.mask-radial-fade {
+  mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 85%);
+}
+
 /* Soft floating glow blob */
 @keyframes float-slow {
   0%,
@@ -232,20 +250,6 @@
 .blob {
   animation: float-slow 14s ease-in-out infinite;
   filter: blur(90px);
-}
-
-/* Hero wave */
-@keyframes wave-shift {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.wave-anim {
-  animation: wave-shift var(--wave-duration, 8s) linear infinite;
 }
 
 /* Lightning sweep for the profile image hover */
@@ -274,7 +278,6 @@
   .marquee-left,
   .marquee-right,
   .blob,
-  .wave-anim,
   .lightning-layer {
     animation: none !important;
   }

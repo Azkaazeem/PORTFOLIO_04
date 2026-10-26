@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, X } from "lucide-react";
 import { certifications, type Certification } from "@/data/portfolio";
-import ShootingStars from "@/components/ShootingStars";
 
 export default function Certifications() {
   const [active, setActive] = useState<Certification | null>(null);
@@ -20,7 +19,6 @@ export default function Certifications() {
 
   return (
     <section id="certifications" className="relative bg-surface py-24 sm:py-28 overflow-hidden">
-      <ShootingStars direction="bottom-right" />
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8">
         <p className="section-label">My Certifications</p>
         <h2 className="display-xl mt-4 text-4xl sm:text-5xl lg:text-6xl">

@@ -3,7 +3,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import profile from "@/assets/profile.png";
 import { bioParagraphs } from "@/data/portfolio";
-import ShootingStars from "@/components/ShootingStars";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,8 +48,6 @@ export default function About() {
 
   return (
     <section id="about" ref={root} className="relative bg-surface min-h-screen flex items-center py-24 sm:py-28 overflow-hidden">
-      <ShootingStars direction="top-left" />
-      
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
         {/* Profile image with lightning hover */}
         <div
