@@ -56,7 +56,9 @@ export default function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
             </span>
-            <span className="font-mono text-[0.72rem] tracking-wide text-primary uppercase font-semibold">Available for Work</span>
+            <span className="font-mono text-[0.72rem] tracking-wide text-primary uppercase font-semibold">
+              Available for Work
+            </span>
             <span className="text-muted-foreground/60">•</span>
             <span className="text-[0.75rem] text-muted-foreground">Karachi, PK</span>
           </div>
@@ -87,7 +89,7 @@ export default function Hero() {
             </a>
             <button
               onClick={() => scrollToSection("contact")}
-              className="group inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card/60 backdrop-blur-sm px-6 py-3.5 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:text-primary"
+              className="contact-btn group inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card/60 backdrop-blur-sm px-6 py-3.5 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:text-primary"
             >
               <Mail className="h-4 w-4" />
               Contact Me
@@ -97,18 +99,30 @@ export default function Hero() {
           {/* Key metrics row */}
           <div className="mt-8 flex flex-wrap items-center gap-6 border-t border-border/60 pt-6">
             <div className="flex flex-col">
-              <span className="font-display text-2xl text-foreground tracking-tight sm:text-3xl">11+</span>
-              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">Projects Built</span>
+              <span className="font-display text-2xl text-foreground tracking-tight sm:text-3xl">
+                11+
+              </span>
+              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
+                Projects Built
+              </span>
             </div>
             <div className="h-8 w-px bg-border/60" />
             <div className="flex flex-col">
-              <span className="font-display text-2xl text-foreground tracking-tight sm:text-3xl">6+</span>
-              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">Certifications</span>
+              <span className="font-display text-2xl text-foreground tracking-tight sm:text-3xl">
+                6+
+              </span>
+              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
+                Certifications
+              </span>
             </div>
             <div className="h-8 w-px bg-border/60" />
             <div className="flex flex-col">
-              <span className="font-display text-2xl text-primary tracking-tight sm:text-3xl">14 yrs</span>
-              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">Young Tech Talent</span>
+              <span className="font-display text-2xl text-primary tracking-tight sm:text-3xl">
+                14 yrs
+              </span>
+              <span className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
+                Young Tech Talent
+              </span>
             </div>
           </div>
 
@@ -137,8 +151,7 @@ export default function Hero() {
               priority="true"
               className="relative z-10 mx-auto max-h-[28rem] w-auto object-contain sm:max-h-[34rem] lg:max-h-[38rem] drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               style={{
-                maskImage:
-                  "radial-gradient(120% 100% at 50% 40%, black 60%, transparent 95%)",
+                maskImage: "radial-gradient(120% 100% at 50% 40%, black 60%, transparent 95%)",
                 WebkitMaskImage:
                   "radial-gradient(120% 100% at 50% 40%, black 60%, transparent 95%)",
               }}

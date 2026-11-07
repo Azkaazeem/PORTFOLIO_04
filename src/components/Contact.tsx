@@ -1,8 +1,18 @@
 import { useState, useRef } from "react";
-import { Github, Linkedin, Mail, MapPin, Share2, Send, CheckCircle2, Loader2, X } from "lucide-react";
+import {
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  Share2,
+  Send,
+  CheckCircle2,
+  Loader2,
+  X,
+} from "lucide-react";
 import { contact } from "@/data/portfolio";
 
-const RedditIcon = (props: any) => (
+const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" {...props}>
     <path d="M14.238 15.348c.085.084.085.221 0 .306-.465.462-1.194.687-2.231.687l-.008-.002-.008.002c-1.036 0-1.766-.225-2.231-.688-.085-.084-.085-.221 0-.305.084-.084.222-.084.307 0 .379.377 1.008.561 1.924.561l.008.002.008-.002c.915 0 1.544-.184 1.924-.561.085-.084.223-.084.307 0zm-3.44-2.418c0-.507-.414-.919-.922-.919-.509 0-.923.412-.923.919 0 .506.414.918.923.918.508.001.922-.411.922-.918zm13.202-.93c0 6.627-5.373 12-12 12s-12-5.373-12-12 5.373-12 12-12 12 5.373 12 12zm-5-.679c0-.975-.794-1.767-1.77-1.767-.622 0-1.166.326-1.48.816-1.558-1.086-3.704-1.737-6.05-1.808l1.293-6.053 4.195 1.053c.015.646.541 1.164 1.189 1.164.658 0 1.191-.533 1.191-1.189 0-.657-.533-1.191-1.191-1.191-.502 0-.932.311-1.096.756l-4.63-1.163c-.11-.027-.223.036-.255.143l-1.427 6.671c-2.443.018-4.681.677-6.305 1.803-.314-.486-.856-.81-1.478-.81-.975 0-1.768.791-1.768 1.766 0 .66.368 1.233.916 1.536-.037.228-.057.461-.057.697 0 3.254 3.993 5.9 8.91 5.9s8.911-2.646 8.911-5.9c0-.236-.02-.468-.058-.696.548-.303.916-.876.916-1.536zm-10.05 3.097c0 .506-.414.918-.923.918-.508 0-.922-.412-.922-.918 0-.507.414-.919.922-.919.509 0 .923.412.923.919z" />
   </svg>
@@ -30,7 +40,8 @@ export default function Contact() {
     const formData = new FormData(form);
 
     // Web3Forms Access Key from .env or fallback
-    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "fe53f3e7-0ef7-4f92-8813-905ab3075c5c";
+    const accessKey =
+      import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "fe53f3e7-0ef7-4f92-8813-905ab3075c5c";
 
     if (!accessKey) {
       // If no key yet configured in .env, simulate successful submission and notify
@@ -76,7 +87,8 @@ export default function Contact() {
             Let&apos;s Get In <span className="text-primary">Touch</span>
           </h2>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            Have a question, project proposal, or want to collaborate? Send me a message below or contact me directly.
+            Have a question, project proposal, or want to collaborate? Send me a message below or
+            contact me directly.
           </p>
         </div>
 
@@ -158,7 +170,10 @@ export default function Contact() {
 
             <form ref={formRef} onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
-                <label htmlFor="name" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label
+                  htmlFor="name"
+                  className="block text-xs font-medium text-muted-foreground mb-1.5"
+                >
                   Your Name *
                 </label>
                 <input
@@ -172,7 +187,10 @@ export default function Contact() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-medium text-muted-foreground mb-1.5"
+                >
                   Your Email *
                 </label>
                 <input
@@ -186,7 +204,10 @@ export default function Contact() {
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label
+                  htmlFor="subject"
+                  className="block text-xs font-medium text-muted-foreground mb-1.5"
+                >
                   Subject
                 </label>
                 <input
@@ -199,7 +220,10 @@ export default function Contact() {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label
+                  htmlFor="message"
+                  className="block text-xs font-medium text-muted-foreground mb-1.5"
+                >
                   Message *
                 </label>
                 <textarea
@@ -212,11 +236,7 @@ export default function Contact() {
                 />
               </div>
 
-              {errorMessage && (
-                <p className="text-xs text-red-500 font-medium">
-                  {errorMessage}
-                </p>
-              )}
+              {errorMessage && <p className="text-xs text-red-500 font-medium">{errorMessage}</p>}
 
               <button
                 type="submit"
@@ -269,7 +289,8 @@ export default function Contact() {
             </h4>
 
             <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-              Thank you for reaching out! Your message has been sent directly to Azka&apos;s Gmail inbox. I will review it and reply as soon as possible.
+              Thank you for reaching out! Your message has been sent directly to Azka&apos;s Gmail
+              inbox. I will review it and reply as soon as possible.
             </p>
 
             <div className="mt-6">

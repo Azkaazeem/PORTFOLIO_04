@@ -36,7 +36,9 @@ export default function CustomCursor() {
     const sample = (x: number, y: number) => {
       const el = document.elementFromPoint(x, y) as HTMLElement | null;
       if (!el) return;
-      isHovering = !!el.closest("button, a, input, textarea, select, [role='button'], [data-cursor-hover]");
+      isHovering = !!el.closest(
+        "button, a, input, textarea, select, [role='button'], [data-cursor-hover]",
+      );
       let node: HTMLElement | null = el;
       let red = false;
       for (let i = 0; i < 4 && node; i++) {
@@ -60,8 +62,12 @@ export default function CustomCursor() {
       }
     };
 
-    const onMouseDown = () => { isClicking = true; };
-    const onMouseUp = () => { isClicking = false; };
+    const onMouseDown = () => {
+      isClicking = true;
+    };
+    const onMouseUp = () => {
+      isClicking = false;
+    };
 
     const render = () => {
       // Smooth lerp for trailing ring
@@ -74,7 +80,9 @@ export default function CustomCursor() {
         ringRef.current.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%) scale(${scale})`;
         ringRef.current.style.borderColor = onRed ? "rgba(255, 255, 255, 0.7)" : "var(--primary)";
         ringRef.current.style.backgroundColor = isHovering
-          ? onRed ? "rgba(255, 255, 255, 0.15)" : "oklch(0.58 0.222 25.5 / 15%)"
+          ? onRed
+            ? "rgba(255, 255, 255, 0.15)"
+            : "oklch(0.58 0.222 25.5 / 15%)"
           : "transparent";
       }
 
@@ -105,7 +113,10 @@ export default function CustomCursor() {
   if (!enabled) return null;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[9999] hidden md:block overflow-hidden">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[9999] hidden md:block overflow-hidden"
+    >
       {/* Trailing halo ring */}
       <div
         ref={ringRef}

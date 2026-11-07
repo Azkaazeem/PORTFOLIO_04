@@ -23,17 +23,17 @@ export default function Projects() {
             My <span className="text-primary">Projects</span>
           </h2>
         </div>
-        
+
         {/* Carousel Navigation Arrows */}
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => scroll("left")}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
             aria-label="Previous project"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
-          <button 
+          <button
             onClick={() => scroll("right")}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
             aria-label="Next project"
@@ -44,14 +44,14 @@ export default function Projects() {
       </div>
 
       {/* Projects Slider */}
-      <div 
+      <div
         ref={scrollRef}
         className="mt-10 mx-auto max-w-[1400px] px-5 sm:px-8 flex gap-6 overflow-x-auto snap-x snap-mandatory pb-10 [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: 'none' }}
+        style={{ scrollbarWidth: "none" }}
       >
         {projects.map((project, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className="group relative w-[100%] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary hover:shadow-glow-soft"
           >
             <div className="relative aspect-video overflow-hidden bg-muted/20 flex items-center justify-center p-2">
@@ -62,18 +62,18 @@ export default function Projects() {
                 className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-background/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-4 z-10">
-                <a 
-                  href={project.url} 
-                  target="_blank" 
+                <a
+                  href={project.url}
+                  target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
                 >
                   Live Demo <ArrowUpRight className="h-4 w-4" />
                 </a>
                 {project.github && (
-                  <a 
-                    href={project.github} 
-                    target="_blank" 
+                  <a
+                    href={project.github}
+                    target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2 rounded-full border border-white/30 bg-black/40 px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-black/60"
                   >
@@ -82,7 +82,7 @@ export default function Projects() {
                 )}
               </div>
             </div>
-            
+
             <div className="px-6 py-5">
               <p className="text-xs font-bold uppercase tracking-widest text-primary">
                 {project.tech}

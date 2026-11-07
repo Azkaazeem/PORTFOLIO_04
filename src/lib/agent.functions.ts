@@ -20,27 +20,30 @@ export const askAgent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Check .env (Vite server context) or process.env
     const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-    
+
     if (!apiKey) {
       return { reply: "The assistant is not connected yet. Please provide a Gemini API key." };
     }
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: AGENT_SYSTEM_PROMPT }]
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          contents: data.messages.map(m => ({
-            role: m.role === "assistant" ? "model" : "user",
-            parts: [{ text: m.content }]
-          }))
-        }),
-      });
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: AGENT_SYSTEM_PROMPT }],
+            },
+            contents: data.messages.map((m) => ({
+              role: m.role === "assistant" ? "model" : "user",
+              parts: [{ text: m.content }],
+            })),
+          }),
+        },
+      );
 
       if (!res.ok) {
         if (res.status === 429) {
@@ -52,7 +55,7 @@ export const askAgent = createServerFn({ method: "POST" })
 
       const json = await res.json();
       const reply = json.candidates?.[0]?.content?.parts?.[0]?.text;
-      
+
       return {
         reply: reply || "Sorry, I did not understand that.",
       };

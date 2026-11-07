@@ -99,12 +99,18 @@
     overflow-x: hidden;
   }
 
-  .hide-cursor, .hide-cursor * {
+  .hide-cursor,
+  .hide-cursor * {
     cursor: none !important;
   }
 
   /* Make sure links and buttons also hide cursor */
-  a, button, input, textarea, select, [role="button"] {
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"] {
   }
 
   ::selection {
@@ -209,18 +215,12 @@
 }
 
 .edge-fade {
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 8%,
-    black 92%,
-    transparent
-  );
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
 /* Subtle background textures for modern depth */
 .bg-grid-subtle {
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 32px 32px;
@@ -317,9 +317,100 @@
   }
 }
 @keyframes float-robo {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 .animate-float-robo {
   animation: float-robo 2.5s ease-in-out infinite;
+}
+
+/* Living Portrait with soft-sheet WebGL physics */
+.hero-portrait-wrap {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 100%;
+  max-width: 400px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  touch-action: pan-y;
+}
+.hero-portrait-inner {
+  transition: transform 0.6s ease-in-out;
+  will-change: transform;
+  position: relative;
+}
+.hero-portrait-inner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#faceGl {
+  position: absolute;
+  left: -35%;
+  top: -35%;
+  width: 170%;
+  height: 170%;
+  pointer-events: none;
+}
+#faceProps {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+#faceFly,
+#faceHand {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.2s;
+  transform: translate(-50%, -50%);
+}
+#faceFly {
+  width: 7%;
+  fill: #111;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 0.8;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+#faceFly .wing {
+  fill: rgba(220, 235, 255, 0.7);
+  transform-origin: 16px 15px;
+  animation: flap 0.05s linear infinite alternate;
+}
+#faceFly .wing.r {
+  animation-direction: alternate-reverse;
+}
+@keyframes flap {
+  from {
+    transform: rotate(-16deg);
+  }
+  to {
+    transform: rotate(16deg);
+  }
+}
+#faceHand {
+  width: 11%;
+  fill: #fff;
+  stroke: #0c0c0c;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+#faceHand .grab {
+  display: none;
+}
+#faceHand.shut .open {
+  display: none;
+}
+#faceHand.shut .grab {
+  display: block;
 }

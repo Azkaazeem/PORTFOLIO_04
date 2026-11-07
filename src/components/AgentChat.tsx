@@ -58,52 +58,62 @@ export default function AgentChat() {
   return (
     <>
       {showHintBox && !open && (
-        <div 
-          className={`fixed bottom-24 right-5 z-[80] flex items-center gap-3 rounded-xl border border-primary/20 bg-background/95 backdrop-blur-md p-3 shadow-glow w-[280px] cursor-pointer transition-all duration-500 ${isHiding ? 'opacity-0 translate-y-4 scale-95 pointer-events-none' : 'opacity-100 translate-y-0 scale-100 animate-float-robo animate-in fade-in slide-in-from-bottom-5'}`} 
-          onClick={() => { 
+        <div
+          className={`fixed bottom-24 right-5 z-[80] flex items-center gap-3 rounded-xl border border-primary/20 bg-background/95 backdrop-blur-md p-3 shadow-glow w-[280px] cursor-pointer transition-all duration-500 ${isHiding ? "opacity-0 translate-y-4 scale-95 pointer-events-none" : "opacity-100 translate-y-0 scale-100 animate-float-robo animate-in fade-in slide-in-from-bottom-5"}`}
+          onClick={() => {
             setIsHiding(true);
             setTimeout(() => {
-              setOpen(true); 
+              setOpen(true);
               setShowHintBox(false);
             }, 300);
           }}
         >
-           {/* robot image */}
-           <div className="shrink-0">
-             <img src="/assets/robot-avatar.jpg" alt="Agent" className="h-12 w-12 rounded-full object-cover shadow-sm" />
-           </div>
-           
-           {/* text */}
-           <div className="flex-1 pr-4">
-             <p className="font-display tracking-wide text-primary text-sm">AZKA'S AGENT</p>
-             <p className="text-muted-foreground text-xs leading-tight mt-0.5">Click here to ask anything about Azka, her skills or projects.</p>
-           </div>
-           
-           {/* close button */}
-           <button 
-             onClick={(e) => {
-               e.stopPropagation();
-               setIsHiding(true);
-               setTimeout(() => setShowHintBox(false), 300);
-             }}
-             className="absolute top-2 right-2 text-muted-foreground hover:text-primary transition-colors"
-             aria-label="Close hint box"
-           >
-             <X className="h-4 w-4" />
-           </button>
-           
-           {/* pointing arrow to the button */}
-           <div className="absolute -bottom-2 right-6 h-4 w-4 rotate-45 border-b border-r border-primary/20 bg-background/95 backdrop-blur-md"></div>
+          {/* robot image */}
+          <div className="shrink-0">
+            <img
+              src="/assets/robot-avatar.jpg"
+              alt="Agent"
+              className="h-12 w-12 rounded-full object-cover shadow-sm"
+            />
+          </div>
+
+          {/* text */}
+          <div className="flex-1 pr-4">
+            <p className="font-display tracking-wide text-primary text-sm">AZKA'S AGENT</p>
+            <p className="text-muted-foreground text-xs leading-tight mt-0.5">
+              Click here to ask anything about Azka, her skills or projects.
+            </p>
+          </div>
+
+          {/* close button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsHiding(true);
+              setTimeout(() => setShowHintBox(false), 300);
+            }}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-primary transition-colors"
+            aria-label="Close hint box"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          {/* pointing arrow to the button */}
+          <div className="absolute -bottom-2 right-6 h-4 w-4 rotate-45 border-b border-r border-primary/20 bg-background/95 backdrop-blur-md"></div>
         </div>
       )}
 
       {/* 3. Yahan import nahi likhna, direct button start karein */}
-      <button 
-        style={{ backgroundImage: `url(${aiChat})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-        onClick={() => { 
+      <button
+        style={{
+          backgroundImage: `url(${aiChat})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        onClick={() => {
           setIsHiding(true);
           setTimeout(() => {
-            setOpen((v) => !v); 
+            setOpen((v) => !v);
             setShowHintBox(false);
           }, 150);
         }}
@@ -129,15 +139,15 @@ export default function AgentChat() {
                 {/* Avatar */}
                 <div className="shrink-0 pt-0.5">
                   {m.role === "user" ? (
-                    <img 
-                      src="/assets/user-avatar.jpg" 
-                      alt="User" 
+                    <img
+                      src="/assets/user-avatar.jpg"
+                      alt="User"
                       className="h-7 w-7 rounded-full object-cover border border-border"
                     />
                   ) : (
-                    <img 
-                      src="/assets/robot-avatar.jpg" 
-                      alt="Agent" 
+                    <img
+                      src="/assets/robot-avatar.jpg"
+                      alt="Agent"
                       className="h-8 w-8 rounded-full object-cover animate-float-robo"
                     />
                   )}
@@ -157,13 +167,26 @@ export default function AgentChat() {
             {busy && (
               <div className="flex gap-2 flex-row">
                 <div className="shrink-0 pt-0.5">
-                  <img src="/assets/robot-avatar.jpg" alt="Agent typing" className="h-8 w-8 rounded-full object-cover animate-float-robo" />
+                  <img
+                    src="/assets/robot-avatar.jpg"
+                    alt="Agent typing"
+                    className="h-8 w-8 rounded-full object-cover animate-float-robo"
+                  />
                 </div>
                 <div className="max-w-[80%] rounded-lg rounded-tl-none bg-secondary border border-border/50 px-3 py-2 text-sm text-muted-foreground shadow-sm flex items-center">
                   <span className="flex gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></span>
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></span>
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></span>
                   </span>
                 </div>
               </div>
