@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { azkaRest } from "@/lib/living-portrait-frames";
 import { resolvePreloaderPhase, type PreloaderPhase } from "@/lib/preloader-timeline";
 
-const CRITICAL_ASSETS = ["/assets/aistudio/Untitled_design_63e8421d.jpg", azkaRest];
+const CRITICAL_ASSETS = [
+  "/assets/aistudio/637cb7b7-2be9-4931-9f7a-a30e6a517395_a9255698.png",
+  azkaRest,
+];
 
 function preloadImage(url: string): Promise<void> {
   return new Promise((resolve) => {
