@@ -26,12 +26,12 @@ export default function Hero() {
       ref={root}
       className="relative isolate flex min-h-[86vh] items-center justify-center overflow-hidden py-20 sm:py-28"
     >
-      {/* Smoothly animated background image at 0.45 (4-5) opacity */}
+      {/* Smoothly animated background image at 0.2 (20%) opacity */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <img
           src="/assets/aistudio/Untitled_design_63e8421d.jpg"
           alt=""
-          className="hero-bg-animate h-full w-full object-cover object-center opacity-[0.45] select-none"
+          className="hero-bg-animate h-full w-full object-cover object-center opacity-20 select-none"
         />
         {/* Soft vignette & vertical gradient so text stays crisp */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/65 via-background/35 to-background/90" />
