@@ -130,3 +130,34 @@ test("stepWavePhysics pulls nodes toward brush and remains finite", () => {
   assert.ok((ux[mid] ?? 0) > 0.01, "Expected positive x displacement toward brush");
   assert.ok((uy[mid] ?? 0) < -0.005, "Expected negative y displacement toward brush");
 });
+
+test("computeSkillCardPose computes left stack, 360-degree loop-de-loop, and right stack", async () => {
+  const { computeSkillCardPose } = await import("./skills-loop-math");
+  const params = {
+    viewportWidth: 1440,
+    viewportHeight: 900,
+    cardWidth: 120,
+    cardHeight: 136,
+    totalCards: 19,
+  };
+
+  // At scrollProgress = 0, card 0 and card 18 rest on the left stack with rotation 0
+  const startFirst = computeSkillCardPose(0, 0, params);
+  const startLast = computeSkillCardPose(0, 18, params);
+  assert.equal(startFirst.rotation, 0);
+  assert.equal(startLast.rotation, 0);
+  assert.ok(startFirst.x < 250 && startLast.x < 250);
+  assert.ok(startLast.zIndex > startFirst.zIndex);
+
+  // Mid-loop for card 0 (upside-down near top of loop, rotation around -180deg)
+  const midFirst = computeSkillCardPose(0.24, 0, params);
+  assert.ok(midFirst.rotation < -120 && midFirst.rotation > -240);
+  assert.ok(midFirst.y < startFirst.y - 150, "Top of loop should be above baseline");
+
+  // At scrollProgress = 1, all cards rest on the right stack at -360deg
+  const endFirst = computeSkillCardPose(1, 0, params);
+  const endLast = computeSkillCardPose(1, 18, params);
+  assert.equal(endFirst.rotation, -360);
+  assert.equal(endLast.rotation, -360);
+  assert.ok(endFirst.x > 1200 && endLast.x > 1200);
+});

@@ -20,6 +20,9 @@ import azkaLaugh from "@/assets/images/azka_laugh_1794065093696.jpg";
 import azkaPuff from "@/assets/images/azka_puff_1794065095308.jpg";
 import azkaHearts from "@/assets/images/azka_hearts_1794065097885.jpg";
 import azkaGum from "@/assets/images/azka_gum_1794065098387.jpg";
+import azkaGumSmall from "@/assets/images/azka_gum_small_1794105610470.jpg";
+import azkaGumMedium from "@/assets/images/azka_gum_medium_1794105611635.jpg";
+import azkaGumPopped from "@/assets/images/azka_gum_popped_1794105613095.jpg";
 import azkaTongue from "@/assets/images/azka_tongue_1794065173571.jpg";
 import azkaCry from "@/assets/images/azka_cry_1794065174713.jpg";
 import azkaDizzy from "@/assets/images/azka_dizzy_1794065177495.jpg";
@@ -86,10 +89,10 @@ export const PORTRAIT_FRAME_URLS: Record<string, string> = {
   puff: azkaPuff,
   hearts: azkaHearts,
   shy: azkaLookDown,
-  gum1: azkaGum,
-  gum2: azkaGum,
+  gum1: azkaGumSmall,
+  gum2: azkaGumMedium,
   gum3: azkaGum,
-  gumpop: azkaShock,
+  gumpop: azkaGumPopped,
   snore: azkaClosed,
   tongue: azkaTongue,
   cry: azkaCry,

@@ -88,15 +88,11 @@
     border-color: var(--color-border);
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .hide-cursor,
@@ -252,6 +248,24 @@
   filter: blur(90px);
 }
 
+/* Smooth continuous drift & zoom for the Hero background image */
+@keyframes hero-bg-drift {
+  0% {
+    transform: scale(1.06) translate3d(-2%, -1%, 0);
+  }
+  50% {
+    transform: scale(1.14) translate3d(2%, 1.5%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(-2%, -1%, 0);
+  }
+}
+
+.hero-bg-animate {
+  animation: hero-bg-drift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* Lightning sweep for the profile image hover */
 @keyframes lightning-flicker {
   0%,
@@ -336,7 +350,7 @@
   transform: translateX(-50%);
   z-index: 10;
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
   top: 50%;
   transform: translate(-50%, -50%);
   touch-action: pan-y;

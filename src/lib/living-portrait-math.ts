@@ -126,7 +126,7 @@ export const ZONES = {
     eyeL: "ouch",
     eyeR: "ouch",
     nose: "act:sneeze",
-    mouth: "tongue",
+    mouth: "act:gum",
     cheek: "puff",
     chin: "laugh",
   } as Record<string, string>,

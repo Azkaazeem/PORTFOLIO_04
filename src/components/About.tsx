@@ -51,9 +51,9 @@ export default function About() {
       ref={root}
       className="relative bg-surface min-h-screen flex items-center py-24 sm:py-28 overflow-hidden"
     >
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
         {/* Interactive WebGL Living Portrait */}
-        <div data-about-media className="relative mx-auto w-full max-w-sm self-center">
+        <div data-about-media className="relative mx-auto w-full max-w-lg self-center">
           <LivingPortrait />
         </div>
 

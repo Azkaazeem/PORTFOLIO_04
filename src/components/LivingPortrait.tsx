@@ -31,84 +31,6 @@ interface EngineControls {
   setMood: (face: string, durationMs: number) => void;
 }
 
-/**
- * Builds a clean, solid silhouette alpha mask from Azka's resting portrait (`azkaRest`)
- * so that only the outer pink curtain is keyed out and her character sits crisply
- * against the static, solid portrait background frame.
- */
-function buildSilhouetteMaskCanvas(restImg: HTMLImageElement): HTMLCanvasElement {
-  const size = 512;
-  const rawCanvas = document.createElement("canvas");
-  rawCanvas.width = size;
-  rawCanvas.height = size;
-  const rawCtx = rawCanvas.getContext("2d", { willReadFrequently: true })!;
-  rawCtx.drawImage(restImg, 0, 0, size, size);
-
-  const imgData = rawCtx.getImageData(0, 0, size, size);
-  const data = imgData.data;
-
-  for (let y = 0; y < size; y++) {
-    const v = y / size;
-    for (let x = 0; x < size; x++) {
-      const u = x / size;
-      const idx = (y * size + x) * 4;
-      const r = data[idx] ?? 0;
-      const g = data[idx + 1] ?? 0;
-      const b = data[idx + 2] ?? 0;
-
-      // 1. Inner face oval is always 100% opaque
-      const faceEll = Math.hypot((u - 0.5) / 0.148, (v - 0.348) / 0.18);
-      let alpha = 255;
-
-      if (v < 0.585) {
-        // Above shoulders: inside faceEll is skin/features; outside faceEll, her hijab in azkaRest is jet black (r < 68)
-        if (faceEll > 1.0) {
-          if (Math.abs(u - 0.5) > 0.265 || v < 0.115) {
-            alpha = 0;
-          } else if (r > 62 && r - g > 12) {
-            // Key out pink curtain and its darker shadow folds cleanly
-            const t = Math.min(1, Math.max(0, (r - 62) / 24));
-            alpha = Math.round(255 * (1 - t));
-          }
-        }
-      } else {
-        // Shoulders & floral sleeves (v >= 0.585): keep 100% solid inside her exact shoulder & sleeve contour
-        let halfW: number;
-        if (v < 0.66) {
-          const k = (v - 0.585) / (0.66 - 0.585);
-          const s = k * k * (3 - 2 * k);
-          halfW = 0.222 + s * (0.322 - 0.222);
-        } else {
-          const k = (v - 0.66) / (1.0 - 0.66);
-          halfW = 0.322 + k * (0.406 - 0.322);
-        }
-        const dist = Math.abs(u - 0.5) - halfW;
-        if (dist > 0.008) {
-          alpha = 0;
-        } else if (dist > -0.008) {
-          alpha = Math.round(255 * (1 - (dist + 0.008) / 0.016));
-        }
-      }
-
-      data[idx] = 255;
-      data[idx + 1] = 255;
-      data[idx + 2] = 255;
-      data[idx + 3] = alpha;
-    }
-  }
-  rawCtx.putImageData(imgData, 0, 0);
-
-  // Feather the silhouette mask by 3px for clean anti-aliased edges
-  const smoothCanvas = document.createElement("canvas");
-  smoothCanvas.width = size;
-  smoothCanvas.height = size;
-  const smoothCtx = smoothCanvas.getContext("2d")!;
-  smoothCtx.filter = "blur(3px)";
-  smoothCtx.drawImage(rawCanvas, 0, 0);
-  smoothCtx.filter = "none";
-  return smoothCanvas;
-}
-
 export default function LivingPortrait() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -158,15 +80,16 @@ export default function LivingPortrait() {
       }`;
 
     const FS = `precision highp float; varying vec2 vUv; varying float vS;
-      uniform sampler2D faceA, faceB, maskTex;
+      uniform sampler2D faceA, faceB;
       uniform float fade;
       void main(){
         if(vUv.x < 0. || vUv.y < 0. || vUv.x > 1. || vUv.y > 1.){ gl_FragColor = vec4(0.); return; }
         vec4 c = mix(texture2D(faceA, vUv), texture2D(faceB, vUv), fade);
-        float maskA = texture2D(maskTex, vUv).a;
-        // Preserve floating red hearts in the 'hearts' expression even outside the hijab silhouette
-        float isHeart = step(0.68, c.r) * step(c.g, 0.28) * step(c.b, 0.36) * step(vUv.y, 0.52);
-        float a = max(maskA, isHeart) * c.a;
+        // Keep the entire portrait & scarf 100% intact; feather only the outer UV border into the static curtain backdrop
+        float edgeX = smoothstep(0.0, 0.06, min(vUv.x, 1.0 - vUv.x));
+        float edgeTop = smoothstep(0.0, 0.06, vUv.y);
+        float edgeBot = smoothstep(0.0, 0.02, 1.0 - vUv.y);
+        float a = edgeX * edgeTop * edgeBot * c.a;
         if(a < .004){ gl_FragColor = vec4(0.); return; }
         gl_FragColor = vec4(c.rgb * vS * a, a);
       }`;
@@ -194,13 +117,11 @@ export default function LivingPortrait() {
       lean: gl.getUniformLocation(pr, "lean"),
       faceA: gl.getUniformLocation(pr, "faceA"),
       faceB: gl.getUniformLocation(pr, "faceB"),
-      maskTex: gl.getUniformLocation(pr, "maskTex"),
       fade: gl.getUniformLocation(pr, "fade"),
     };
     gl.uniform1f(U.over_, OVER);
     gl.uniform1i(U.faceA, 0);
     gl.uniform1i(U.faceB, 1);
-    gl.uniform1i(U.maskTex, 2);
 
     // ---- the sheet: damped wave equation on the displacement of each node ----
     const count = M * M;
@@ -296,7 +217,6 @@ export default function LivingPortrait() {
     // ---- WebGL textures loaded directly from pixel-aligned 3D portrait renders ----
     const tex: Record<string, WebGLTexture> = {};
     const urlTexCache = new Map<string, Promise<WebGLTexture>>();
-    let maskTexture: WebGLTexture | null = null;
 
     const param = () => {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -326,14 +246,6 @@ export default function LivingPortrait() {
           gl.bindTexture(gl.TEXTURE_2D, t);
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
           param();
-          if (url === azkaRest && !maskTexture) {
-            const maskCanvas = buildSilhouetteMaskCanvas(im);
-            maskTexture = gl.createTexture()!;
-            gl.activeTexture(gl.TEXTURE2);
-            gl.bindTexture(gl.TEXTURE_2D, maskTexture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, maskCanvas);
-            param();
-          }
           tex[name] = t;
           resolve(t);
         };
@@ -420,12 +332,11 @@ export default function LivingPortrait() {
         ["shy", 140, 650],
       ],
       gum: [
-        ["gum1", 130, 800],
-        ["gum2", 180, 460],
-        ["gum3", 200, 760],
-        ["gumpop", 40, 1300, { jolt: [SPOT.mouth[0], SPOT.mouth[1], 0, -1.0, 0.28] }],
-        ["deadpan", 200, 700],
-        ["laugh", 130, 700],
+        ["gum1", 110, 550],
+        ["gum2", 130, 600],
+        ["gum3", 150, 750],
+        ["gumpop", 35, 2800, { jolt: [SPOT.mouth[0], SPOT.mouth[1], 0, -1.0, 0.28] }],
+        ["laugh", 140, 800],
       ],
       doze: [
         ["half", 450, 700, { lean: [0.006, 0.006] }],
@@ -606,6 +517,7 @@ export default function LivingPortrait() {
       if (n === faceB) return;
       faceA = (now - fadeT) / fadeMs > 0.5 ? faceB : faceA;
       faceB = n;
+      canvas.dataset.face = n;
       fadeT = now;
       fadeMs = Math.min(70, Math.max(1, ms));
     }
@@ -744,6 +656,13 @@ export default function LivingPortrait() {
       const now = performance.now();
       const [u, v] = toUv(e.clientX, e.clientY);
       if (!isSolidAvatar(u, v)) return;
+      // If she is currently inflating a bubblegum bubble (gum1/gum2/gum3), clicking pops it right onto her face!
+      if (act === ACTS["gum"] && actI < 3) {
+        actI = 2;
+        advance(now);
+        e.preventDefault();
+        return;
+      }
       manualActLock = false;
       wake(now);
       endAct();
@@ -867,7 +786,7 @@ export default function LivingPortrait() {
         if (manualLockTimer) clearTimeout(manualLockTimer);
         manualLockTimer = setTimeout(() => {
           manualActLock = false;
-        }, 4500);
+        }, 6000);
         startAct(name, now);
       },
       cycleHair: () => {
@@ -1110,19 +1029,18 @@ export default function LivingPortrait() {
       gl.bindTexture(gl.TEXTURE_2D, tex[faceA] || tex["rest"]!);
       gl.activeTexture(gl.TEXTURE1);
       gl.bindTexture(gl.TEXTURE_2D, tex[faceB] || tex["rest"]!);
-      if (maskTexture) {
-        gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_2D, maskTexture);
-      }
       gl.uniform1f(U.fade, Math.min(1, (now - fadeT) / fadeMs));
       gl.uniform2f(U.lean, leanX, leanY);
       gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
     }
 
-    // Boot: load rest, closed, and half first, then stream all remaining 3D portrait frames in parallel
-    Promise.all(["rest", "closed", "half"].map(loadPortraitTexture)).then(() => {
+    // Boot: load rest, closed, half, and the bubblegum sequence first, then stream remaining frames
+    Promise.all(
+      ["rest", "closed", "half", "gum1", "gum2", "gum3", "gumpop"].map(loadPortraitTexture),
+    ).then(() => {
       if (disposed) return;
       fallback.style.visibility = "hidden";
+      canvas.dataset.face = "rest";
       ready = true;
       tStart = performance.now();
       rafId = requestAnimationFrame(frame);
@@ -1156,15 +1074,15 @@ export default function LivingPortrait() {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center gap-3 w-full">
-      {/* Vertical icon-only action rail docked on the left edge */}
-      <div className="z-20 flex flex-col gap-2" role="toolbar" aria-label="Portrait interactions">
+    <div className="relative flex items-center justify-center gap-3.5 sm:gap-4 w-full">
+      {/* Vertical rounded icon-only action rail docked on the left edge */}
+      <div className="z-20 flex flex-col gap-2.5" role="toolbar" aria-label="Portrait interactions">
         <button
           type="button"
           onClick={() => controlsRef.current?.triggerAct("fly")}
           title="Fly on Nose"
           aria-label="Fly on Nose"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Bug className="h-4 w-4" />
         </button>
@@ -1173,7 +1091,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("tug")}
           title="Cheek Tug"
           aria-label="Cheek Tug"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Hand className="h-4 w-4" />
         </button>
@@ -1182,7 +1100,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("gum")}
           title="Bubblegum"
           aria-label="Bubblegum"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <CircleDot className="h-4 w-4" />
         </button>
@@ -1191,7 +1109,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("sneeze")}
           title="Sneeze"
           aria-label="Sneeze"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Wind className="h-4 w-4" />
         </button>
@@ -1200,7 +1118,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("flirt")}
           title="Heart Eyes"
           aria-label="Heart Eyes"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Heart className="h-4 w-4" />
         </button>
@@ -1209,7 +1127,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("doze")}
           title="Doze / Snore"
           aria-label="Doze / Snore"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Moon className="h-4 w-4" />
         </button>
@@ -1218,36 +1136,20 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.cycleHair()}
           title="Change Hijab Color"
           aria-label="Change Hijab Color"
-          className="flex h-9 w-9 items-center justify-center border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
         >
           <Palette className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Static, solid portrait frame with WebGL Living Portrait inside */}
-      <div className="relative w-full max-w-[340px] aspect-square flex items-center justify-center overflow-hidden border border-primary/45 bg-surface-2 shadow-glow-soft">
-        {/* Solid architectural backdrop layers (completely static when face stretches) */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-surface-2" />
-        <div
+      {/* Enlarged portrait frame with the user-provided static curtain background */}
+      <div className="relative w-full max-w-[420px] sm:max-w-[460px] aspect-square flex items-center justify-center overflow-hidden rounded-2xl border border-primary/40 bg-surface-2 shadow-glow-soft">
+        {/* Static background image provided by user */}
+        <img
+          src="/assets/aistudio/image_bd54e900.png"
+          alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-2.5 border border-primary/30 bg-accent"
-        />
-        {/* Corner frame accents */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute top-2 left-2 h-3 w-3 border-t-2 border-l-2 border-primary"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute top-2 right-2 h-3 w-3 border-t-2 border-r-2 border-primary"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-2 left-2 h-3 w-3 border-b-2 border-l-2 border-primary"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-2 right-2 h-3 w-3 border-b-2 border-r-2 border-primary"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
         />
 
         <div

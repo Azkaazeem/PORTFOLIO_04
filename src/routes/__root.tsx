@@ -80,7 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Azka Azeem — Portfolio" },
       {
         name: "description",
-        content: "Portfolio of Azka Azeem — MERN developer, prompt engineer and graphic designer.",
+        content:
+          "Portfolio of Azka Azeem — data scientist, MERN developer, prompt engineer and graphic designer.",
       },
       { name: "author", content: "Azka Azeem" },
       { property: "og:site_name", content: "Azka Azeem" },
