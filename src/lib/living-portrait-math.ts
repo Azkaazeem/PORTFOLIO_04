@@ -137,14 +137,12 @@ export const ROTATION = [
   "shifty",
   "gum",
   "fly",
-  "flirt",
   "roll",
   "sneeze",
   "hair",
   "tug",
   "cross",
   "whistle",
-  "doze",
   "cheeky",
   "wow",
   "sad",
@@ -190,14 +188,14 @@ export function zoneAt(u: number, v: number): FaceZone {
  * (head, hijab, and shoulders) rather than the outer background margin.
  */
 export function isSolidAvatar(u: number, v: number): boolean {
-  if (u < 0.08 || u > 0.92 || v < 0.08 || v > 0.96) return false;
-  // Head & hijab dome
-  const headDx = (u - 0.5) / 0.27;
-  const headDy = (v - 0.38) / 0.31;
+  if (u < 0.05 || u > 0.95 || v < 0.05 || v > 0.99) return false;
+  // Head, face & hijab dome
+  const headDx = (u - 0.5) / 0.36;
+  const headDy = (v - 0.4) / 0.36;
   if (headDx * headDx + headDy * headDy <= 1) return true;
-  // Scarf drape & shoulders
-  if (v >= 0.52 && v <= 0.96) {
-    const halfWidth = 0.27 + ((v - 0.52) / 0.44) * 0.17;
+  // Scarf drape, shoulders, arms & shirt all the way to the bottom of the box
+  if (v >= 0.48 && v <= 0.99) {
+    const halfWidth = 0.34 + ((v - 0.48) / 0.51) * 0.12;
     if (Math.abs(u - 0.5) <= halfWidth) return true;
   }
   return false;
@@ -276,6 +274,38 @@ export interface BrushHold {
   py: number;
 }
 
+export function computeGrabWeight(
+  rx: number,
+  ry: number,
+  ux: number,
+  uy: number,
+  u: number,
+  v: number,
+  radius = 0.13,
+  origin = -0.35,
+  over = 1.7,
+  px = 0,
+  py = 0,
+): number {
+  const minCoord = origin + 0.05;
+  const maxCoord = origin + over - 0.05;
+  const ex = Math.min(rx - minCoord, maxCoord - rx) / 0.18;
+  // Gently protect the top crown of the hijab from caving in while keeping cheeks, nose, eyes, and chin elastic
+  const eyTop = (ry - 0.1) / 0.14;
+  // Keep shoulders, arms & floral shirt (ry >= 0.68) anchored to the box
+  const eyBot = (0.68 - ry) / 0.14;
+  const edge = Math.max(0, Math.min(1, Math.min(ex, Math.min(eyTop, eyBot))));
+  if (edge <= 0.005) return 0;
+
+  const dx = rx + ux - u;
+  const dy = ry + uy - v;
+  const d2 = dx * dx + dy * dy;
+  const r2 = radius * radius;
+  void px;
+  void py;
+  return Math.exp(-d2 / (1.5 * r2)) * edge;
+}
+
 export function stepWavePhysics(
   ux: Float32Array,
   uy: Float32Array,
@@ -314,17 +344,28 @@ export function stepWavePhysics(
   }
   if (brush) {
     for (const [k, w, u0, v0] of brush.list) {
-      const K = 3000 * w;
-      const D = 90 * w;
+      const targetX = u0 + brush.px * w;
+      const targetY = v0 + brush.py * w;
+      const K = 4200 * w;
+      const D = 95 * w;
       const vxk = vx[k] ?? 0;
       const vyk = vy[k] ?? 0;
-      vx[k] = vxk + ((u0 + brush.px * w - (ux[k] ?? 0)) * K - vxk * D) * dt;
-      vy[k] = vyk + ((v0 + brush.py * w - (uy[k] ?? 0)) * K - vyk * D) * dt;
+      vx[k] = vxk + ((targetX - (ux[k] ?? 0)) * K - vxk * D) * dt;
+      vy[k] = vyk + ((targetY - (uy[k] ?? 0)) * K - vyk * D) * dt;
     }
   }
   for (let k = 0; k < count; k++) {
     ux[k] = (ux[k] ?? 0) + (vx[k] ?? 0) * dt;
     uy[k] = (uy[k] ?? 0) + (vy[k] ?? 0) * dt;
+  }
+  if (brush) {
+    for (const [k, w, u0, v0] of brush.list) {
+      const targetX = u0 + brush.px * w;
+      const targetY = v0 + brush.py * w;
+      const lock = 0.08 * w;
+      ux[k] = (ux[k] ?? 0) + (targetX - (ux[k] ?? 0)) * lock;
+      uy[k] = (uy[k] ?? 0) + (targetY - (uy[k] ?? 0)) * lock;
+    }
   }
 }
 

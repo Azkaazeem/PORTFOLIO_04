@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Bug, CircleDot, Hand, Heart, Moon, Palette, Wind } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bug, CircleDot, Hand, Palette, Wind } from "lucide-react";
 import {
   IDS,
   EYEFILE,
@@ -12,6 +12,7 @@ import {
   ringFor,
   untangleGrid,
   stepWavePhysics,
+  computeGrabWeight,
   BrushHold,
 } from "@/lib/living-portrait-math";
 import { PORTRAIT_FRAME_URLS, azkaRest } from "@/lib/living-portrait-frames";
@@ -38,6 +39,7 @@ export default function LivingPortrait() {
   const flyRef = useRef<SVGSVGElement | null>(null);
   const handRef = useRef<SVGSVGElement | null>(null);
   const controlsRef = useRef<EngineControls | null>(null);
+  const [bubbleText, setBubbleText] = useState("HEY! Drag & stretch my face!");
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -62,11 +64,11 @@ export default function LivingPortrait() {
     const M = N + 1;
     const SPAN = OVER / N;
     const ORIGIN = 0.5 - OVER / 2;
-    const WOBBLE = 2.3 * 2 * Math.PI;
-    const REACH = 0.085 / SPAN;
+    const WOBBLE = 3.2 * 2 * Math.PI;
+    const REACH = 0.092 / SPAN;
     const C = REACH * WOBBLE;
-    const GAMMA = 2 * 0.14 * WOBBLE;
-    const NU = 0.2 * C;
+    const GAMMA = 2 * 0.12 * WOBBLE;
+    const NU = 0.16 * C;
     const GAP = SPAN * 0.34;
 
     const VS = `attribute vec2 a, d; attribute float s; varying vec2 vUv; varying float vS;
@@ -74,22 +76,20 @@ export default function LivingPortrait() {
       void main(){
         vUv = a;
         vS = s;
-        float headWeight = exp(-((a.x - 0.5)*(a.x - 0.5)/0.14 + (a.y - 0.38)*(a.y - 0.38)/0.18));
-        vec2 p = a + d + lean * (0.35 + 0.65 * headWeight);
+        float torsoPin = smoothstep(0.68, 0.45, a.y);
+        vec2 p = a + d + lean * torsoPin;
         gl_Position = vec4(vec2(p.x - .5, .5 - p.y) * 2. / overS, 0., 1.);
       }`;
 
     const FS = `precision highp float; varying vec2 vUv; varying float vS;
-      uniform sampler2D faceA, faceB;
+      uniform sampler2D faceA, faceB, maskTex;
       uniform float fade;
       void main(){
         if(vUv.x < 0. || vUv.y < 0. || vUv.x > 1. || vUv.y > 1.){ gl_FragColor = vec4(0.); return; }
+        float maskA = texture2D(maskTex, vUv).a;
+        if(maskA < .004){ gl_FragColor = vec4(0.); return; }
         vec4 c = mix(texture2D(faceA, vUv), texture2D(faceB, vUv), fade);
-        // Keep the entire portrait & scarf 100% intact; feather only the outer UV border into the static curtain backdrop
-        float edgeX = smoothstep(0.0, 0.06, min(vUv.x, 1.0 - vUv.x));
-        float edgeTop = smoothstep(0.0, 0.06, vUv.y);
-        float edgeBot = smoothstep(0.0, 0.02, 1.0 - vUv.y);
-        float a = edgeX * edgeTop * edgeBot * c.a;
+        float a = maskA * c.a;
         if(a < .004){ gl_FragColor = vec4(0.); return; }
         gl_FragColor = vec4(c.rgb * vS * a, a);
       }`;
@@ -117,11 +117,13 @@ export default function LivingPortrait() {
       lean: gl.getUniformLocation(pr, "lean"),
       faceA: gl.getUniformLocation(pr, "faceA"),
       faceB: gl.getUniformLocation(pr, "faceB"),
+      maskTex: gl.getUniformLocation(pr, "maskTex"),
       fade: gl.getUniformLocation(pr, "fade"),
     };
     gl.uniform1f(U.over_, OVER);
     gl.uniform1i(U.faceA, 0);
     gl.uniform1i(U.faceB, 1);
+    gl.uniform1i(U.maskTex, 2);
 
     // ---- the sheet: damped wave equation on the displacement of each node ----
     const count = M * M;
@@ -191,17 +193,29 @@ export default function LivingPortrait() {
     gl.clearColor(0, 0, 0, 0);
 
     let brush: BrushHold | null = null;
-    function takeHold(u: number, v: number, radius = 0.22) {
+    function takeHold(u: number, v: number, radius = 0.13, px = 0, py = 0) {
       const list: Array<[number, number, number, number]> = [];
       for (let k = 0; k < count; k++) {
-        const dx = (rest[k * 2] ?? 0) + (ux[k] ?? 0) - u;
-        const dy = (rest[k * 2 + 1] ?? 0) + (uy[k] ?? 0) - v;
-        const w = Math.exp(-(dx * dx + dy * dy) / (radius * radius));
-        if (w > 0.02) {
+        const rx = rest[k * 2] ?? 0;
+        const ry = rest[k * 2 + 1] ?? 0;
+        const w = computeGrabWeight(
+          rx,
+          ry,
+          ux[k] ?? 0,
+          uy[k] ?? 0,
+          u,
+          v,
+          radius,
+          ORIGIN,
+          OVER,
+          px,
+          py,
+        );
+        if (w > 0.008) {
           list.push([k, w, ux[k] ?? 0, uy[k] ?? 0]);
         }
       }
-      brush = { u, v, list, px: 0, py: 0 };
+      brush = { u, v, list, px, py };
     }
 
     function poke(u: number, v: number, dx: number, dy: number, radius = 0.09) {
@@ -217,6 +231,8 @@ export default function LivingPortrait() {
     // ---- WebGL textures loaded directly from pixel-aligned 3D portrait renders ----
     const tex: Record<string, WebGLTexture> = {};
     const urlTexCache = new Map<string, Promise<WebGLTexture>>();
+    let maskGlTex: WebGLTexture | null = null;
+    let restImageEl: HTMLImageElement | null = null;
 
     const param = () => {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -225,6 +241,157 @@ export default function LivingPortrait() {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     };
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+
+    // Build an exact, hole-free full-figure silhouette mask (head, hijab, arms, and floral shirt down to v = 1.0)
+    // while removing 100% of the vertical-pleated pink curtain background.
+    function buildSilhouetteMaskTexture(fgImg: HTMLImageElement) {
+      const S = 512;
+      const c = document.createElement("canvas");
+      c.width = S;
+      c.height = S;
+      const ctx = c.getContext("2d", { willReadFrequently: true })!;
+
+      ctx.drawImage(fgImg, 0, 0, S, S);
+      const fg = ctx.getImageData(0, 0, S, S);
+      const fgData = fg.data;
+
+      const rawLeft = new Int32Array(S).fill(S);
+      const rawRight = new Int32Array(S).fill(-1);
+
+      const isFgAt = (x: number, y: number, v: number) => {
+        const idx = (y * S + x) * 4;
+        const r = fgData[idx] ?? 0;
+        const g = fgData[idx + 1] ?? 0;
+        const b = fgData[idx + 2] ?? 0;
+        if (r < 95 && g < 88 && b < 95) return true;
+        if (v <= 0.585) return false;
+        if (x > S * 0.5 && v <= 0.625) return false;
+
+        const yUp = Math.max(0, y - 4);
+        const yDn = Math.min(S - 1, y + 4);
+        const idxUp = (yUp * S + x) * 4;
+        const idxDn = (yDn * S + x) * 4;
+        const vGrad =
+          Math.abs((fgData[idxDn] ?? r) - (fgData[idxUp] ?? r)) +
+          Math.abs((fgData[idxDn + 1] ?? g) - (fgData[idxUp + 1] ?? g)) +
+          Math.abs((fgData[idxDn + 2] ?? b) - (fgData[idxUp + 2] ?? b));
+
+        const rg = r - g;
+        const bg = b - g;
+        const isPinkCurtain =
+          r >= 138 &&
+          g >= 85 &&
+          g <= 168 &&
+          b >= 95 &&
+          b <= 178 &&
+          rg >= 42 &&
+          rg <= 96 &&
+          bg >= -4 &&
+          bg <= 26 &&
+          vGrad <= 28;
+
+        return !isPinkCurtain;
+      };
+
+      let prevLx = Math.floor(S * 0.25);
+      let prevRx = Math.floor(S * 0.75);
+
+      for (let y = 0; y < S; y++) {
+        const v = y / (S - 1);
+        if (v < 0.118) continue;
+
+        let lx = S;
+        const minSleeveU =
+          v <= 0.625 ? 0.228 - ((v - 0.585) / 0.04) * 0.052 : 0.176 - ((v - 0.625) / 0.375) * 0.084;
+        const minX =
+          v <= 0.585
+            ? Math.floor(S * 0.06)
+            : Math.max(Math.round(minSleeveU * (S - 1)), prevLx - 1);
+        const midX = Math.floor(S * 0.5);
+        for (let x = minX; x < midX; x++) {
+          let hits = 0;
+          for (let dx = 0; dx < 5; dx++) {
+            if (isFgAt(Math.min(S - 1, x + dx), y, v)) hits++;
+          }
+          if (hits >= 4) {
+            lx = x;
+            break;
+          }
+        }
+
+        let rx = -1;
+        const maxSleeveU =
+          v <= 0.665 ? 0.806 + ((v - 0.625) / 0.04) * 0.034 : 0.84 + ((v - 0.665) / 0.335) * 0.072;
+        const maxX =
+          v <= 0.625
+            ? Math.floor(S * 0.94)
+            : Math.min(Math.round(maxSleeveU * (S - 1)), prevRx + 1);
+        for (let x = maxX; x >= midX; x--) {
+          let hits = 0;
+          for (let dx = 0; dx < 5; dx++) {
+            if (isFgAt(Math.max(0, x - dx), y, v)) hits++;
+          }
+          if (hits >= 4) {
+            rx = x;
+            break;
+          }
+        }
+
+        if (lx < rx) {
+          prevLx = lx;
+          prevRx = rx;
+          // Step 3px inward to eliminate any pink JPEG anti-aliasing halo along the hijab & sleeve seam
+          rawLeft[y] = lx + 3;
+          rawRight[y] = rx - 3;
+        }
+      }
+
+      // Smooth silhouette contour across rows and keep full arms & shirt all the way to the bottom of the box (v = 1.0)
+      const out = ctx.createImageData(S, S);
+      const outData = out.data;
+
+      for (let y = 0; y < S; y++) {
+        const v = y / (S - 1);
+        let sumL = 0;
+        let sumR = 0;
+        let cnt = 0;
+        for (let dy = -4; dy <= 4; dy++) {
+          const yy = Math.max(0, Math.min(S - 1, y + dy));
+          if ((rawLeft[yy] ?? S) < (rawRight[yy] ?? -1)) {
+            sumL += rawLeft[yy]!;
+            sumR += rawRight[yy]!;
+            cnt++;
+          }
+        }
+        if (cnt === 0) continue;
+        const lEdge = sumL / cnt;
+        const rEdge = sumR / cnt;
+        if (lEdge >= rEdge) continue;
+
+        // Soft top crown feather; keep bottom solid all the way to v = 1.0 so arms & shirt fill the box down to the bottom edge
+        const topFeather = Math.max(0, Math.min(1, (v - 0.116) / 0.01));
+        const vAlpha = topFeather;
+
+        for (let x = 0; x < S; x++) {
+          const distIn = Math.min(x - lEdge, rEdge - x);
+          if (distIn <= -2) continue;
+          const hAlpha = Math.max(0, Math.min(1, (distIn + 1.5) / 3.0));
+          const a = Math.round(hAlpha * vAlpha * 255);
+          const idx = (y * S + x) * 4;
+          outData[idx] = 255;
+          outData[idx + 1] = 255;
+          outData[idx + 2] = 255;
+          outData[idx + 3] = a;
+        }
+      }
+
+      const t = gl.createTexture()!;
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, out);
+      param();
+      maskGlTex = t;
+    }
 
     function loadPortraitTexture(name: string): Promise<WebGLTexture> {
       if (tex[name]) return Promise.resolve(tex[name]!);
@@ -241,6 +408,9 @@ export default function LivingPortrait() {
         im.crossOrigin = "anonymous";
         im.onload = () => {
           if (disposed) return;
+          if (name === "rest" && !restImageEl) {
+            restImageEl = im;
+          }
           const t = gl.createTexture()!;
           gl.activeTexture(gl.TEXTURE5);
           gl.bindTexture(gl.TEXTURE_2D, t);
@@ -338,20 +508,6 @@ export default function LivingPortrait() {
         ["gumpop", 35, 2800, { jolt: [SPOT.mouth[0], SPOT.mouth[1], 0, -1.0, 0.28] }],
         ["laugh", 140, 800],
       ],
-      doze: [
-        ["half", 450, 700, { lean: [0.006, 0.006] }],
-        ["closed", 320, 500, { lean: [0.012, 0.012] }],
-        ["half", 200, 340],
-        ["closed", 400, 1100, { lean: [0.02, 0.02] }],
-        ["snore", 260, 3400, { lean: [0.03, 0.03], wake: 1 }],
-        ["shock", 50, 650, { jolt: [0.5, 0.36, 0, -0.9, 0.3] }],
-      ],
-      flirt: [
-        ["hearts", 100, 2400],
-        ["kiss", 120, 620],
-        ["winkr", 90, 520],
-        ["grin", 130, 600],
-      ],
       cheeky: [
         ["winkl", 90, 340],
         ["tongue", 110, 900],
@@ -426,10 +582,10 @@ export default function LivingPortrait() {
       return [
         g(SPOT.cheekR[0], SPOT.cheekR[1], 760, "eye:se", false),
         g(SPOT.cheekR[0], SPOT.cheekR[1], 240, "shock", "on"),
-        g(0.76, 0.36, 620, "ouch", "pull"),
-        g(0.69, 0.4, 240, "ouch", "pull"),
-        g(0.79, 0.35, 240, "ouch", "pull"),
-        g(0.72, 0.38, 260, "ouch", "pull"),
+        g(0.88, 0.32, 620, "ouch", "pull"),
+        g(0.68, 0.42, 240, "ouch", "pull"),
+        g(0.92, 0.28, 260, "scared", "pull"),
+        g(0.74, 0.38, 260, "ouch", "pull"),
         g(1.35, 0.22, 1000, "dizzy", "off"),
         ["angry", 120, 620],
       ];
@@ -616,11 +772,8 @@ export default function LivingPortrait() {
       speed += Math.hypot(dx, dy) * 0.004;
       wake(now);
 
-      if (act && !pressed && act !== ACTS["doze"] && !manualActLock) {
+      if (act && !pressed && !manualActLock) {
         endAct();
-      } else if (act === ACTS["doze"] && !manualActLock) {
-        actI = act.length - 2;
-        advance(now);
       }
 
       onHead = isSolidAvatar(pu, pv);
@@ -632,20 +785,20 @@ export default function LivingPortrait() {
       wrap.style.cursor = pressed ? "grabbing" : onHead ? "grab" : "";
 
       if (onHead && !pressed) {
-        poke(pu, pv, dx * 0.00035, dy * 0.00035, 0.07);
+        poke(pu, pv, dx * 0.00065, dy * 0.00065, 0.09);
       }
       if (pressed && brush) {
         let px = pu - brush.u;
         let py = pv - brush.v;
         const L = Math.hypot(px, py);
-        const lim = 0.2;
+        const lim = 0.18;
         if (L > 0) {
           const k = (lim * (1 - Math.exp(-L / lim))) / L;
           px *= k;
           py *= k;
         }
-        brush.px = px;
-        brush.py = py;
+        brush.px = Math.max(-0.18, Math.min(0.18, px));
+        brush.py = Math.max(-0.14, Math.min(0.14, py));
       }
     };
 
@@ -672,6 +825,7 @@ export default function LivingPortrait() {
       downV = v;
       takeHold(u, v);
       moodFace = null;
+      setBubbleText("OW! HEY, Easy on my face!");
       wrap.style.cursor = "grabbing";
       try {
         wrap.setPointerCapture(e.pointerId);
@@ -696,6 +850,9 @@ export default function LivingPortrait() {
         // Tap reaction
         if (z === "hair") {
           hairI = hairI + 1 >= HAIRS.length ? -1 : hairI + 1;
+          setBubbleText(
+            hairI >= 0 ? `New ${HAIRS[hairI]!.toUpperCase()} hijab!` : "Back to classic black!",
+          );
         } else {
           const r = ZONES.tap[z];
           if (r) {
@@ -707,6 +864,7 @@ export default function LivingPortrait() {
             }
           }
           poke(downU, downV, 0, 0.45, 0.06);
+          setBubbleText("HEY! That tickles!");
         }
         return;
       }
@@ -716,6 +874,13 @@ export default function LivingPortrait() {
       moodFace =
         n >= 8 ? "cry" : n >= 5 ? "angry" : L > 0.18 ? "dizzy" : L > 0.08 ? "scrunch" : "deadpan";
       moodUntil = now + (n >= 5 ? 2600 : 700 + L * 2800);
+      setBubbleText(
+        n >= 5
+          ? "STOP PULLING MY CHEEKS!"
+          : L > 0.18
+            ? "WOAH! So stretchy & dizzy!"
+            : "HEY! Drag & stretch my face!",
+      );
     };
 
     const onPointerLeave = () => {
@@ -723,7 +888,7 @@ export default function LivingPortrait() {
     };
 
     const onContactEnter = () => {
-      moodFace = "hearts";
+      moodFace = "grin";
       moodUntil = performance.now() + 1e7;
     };
     const onContactLeave = () => {
@@ -860,7 +1025,7 @@ export default function LivingPortrait() {
       ];
       place(hand!, hp[0], hp[1]);
       if (handGrip === "on" && !handHeld) {
-        takeHold(hp[0], hp[1], 0.22);
+        takeHold(hp[0], hp[1], 0.24);
         handHeld = true;
         hand!.classList.add("shut");
         handGrip = "pull";
@@ -941,24 +1106,24 @@ export default function LivingPortrait() {
 
       compose(now);
 
-      // Head leans toward pull, cursor, and act lean
+      // Subtle head lean while allowing the grabbed feature (cheek/nose/chin/brow) to elongate dramatically
       const tx =
         (pressed || handHeld
           ? brush
-            ? brush.px * 0.16
+            ? brush.px * 0.035
             : 0
           : awake
-            ? Math.max(-0.02, Math.min(0.02, (pu - 0.5) * 0.015))
+            ? Math.max(-0.024, Math.min(0.024, (pu - 0.5) * 0.018))
             : 0) +
         wantLean[0] +
         Math.sin(now * 0.0009) * 0.0015;
       const ty =
         (pressed || handHeld
           ? brush
-            ? brush.py * 0.16
+            ? brush.py * 0.035
             : 0
           : awake
-            ? Math.max(-0.016, Math.min(0.016, (pv - 0.35) * 0.01))
+            ? Math.max(-0.018, Math.min(0.018, (pv - 0.35) * 0.012))
             : 0) +
         wantLean[1] +
         Math.sin(now * 0.0013) * 0.0022;
@@ -1029,23 +1194,44 @@ export default function LivingPortrait() {
       gl.bindTexture(gl.TEXTURE_2D, tex[faceA] || tex["rest"]!);
       gl.activeTexture(gl.TEXTURE1);
       gl.bindTexture(gl.TEXTURE_2D, tex[faceB] || tex["rest"]!);
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, maskGlTex || tex["rest"]!);
       gl.uniform1f(U.fade, Math.min(1, (now - fadeT) / fadeMs));
       gl.uniform2f(U.lean, leanX, leanY);
       gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
+      if (fallback.style.visibility !== "hidden") {
+        fallback.style.visibility = "hidden";
+      }
     }
 
-    // Boot: load rest, closed, half, and the bubblegum sequence first, then stream remaining frames
-    Promise.all(
-      ["rest", "closed", "half", "gum1", "gum2", "gum3", "gumpop"].map(loadPortraitTexture),
-    ).then(() => {
+    // Boot: load the resting portrait first so the cutout mask and WebGL canvas render immediately,
+    // then preload blink, stretch reaction, and remaining expression textures in the background.
+    loadPortraitTexture("rest").then(() => {
       if (disposed) return;
-      fallback.style.visibility = "hidden";
+      if (restImageEl) {
+        buildSilhouetteMaskTexture(restImageEl);
+      }
       canvas.dataset.face = "rest";
       ready = true;
       tStart = performance.now();
       rafId = requestAnimationFrame(frame);
 
-      const restKeys = Object.keys(IDS).filter((n) => !tex[n]);
+      const priorityKeys = [
+        "closed",
+        "half",
+        "shock",
+        "ouch",
+        "scared",
+        "dizzy",
+        "gum1",
+        "gum2",
+        "gum3",
+        "gumpop",
+      ];
+      const restKeys = [
+        ...priorityKeys,
+        ...Object.keys(IDS).filter((n) => n !== "rest" && !priorityKeys.includes(n)),
+      ];
       const next = (): Promise<unknown> | undefined => {
         if (disposed) return undefined;
         const k = restKeys.shift();
@@ -1074,9 +1260,9 @@ export default function LivingPortrait() {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center gap-3.5 sm:gap-4 w-full">
+    <div className="relative flex items-center justify-center gap-3.5 sm:gap-5 w-full">
       {/* Vertical rounded icon-only action rail docked on the left edge */}
-      <div className="z-20 flex flex-col gap-2.5" role="toolbar" aria-label="Portrait interactions">
+      <div className="z-30 flex flex-col gap-2.5" role="toolbar" aria-label="Portrait interactions">
         <button
           type="button"
           onClick={() => controlsRef.current?.triggerAct("fly")}
@@ -1115,24 +1301,6 @@ export default function LivingPortrait() {
         </button>
         <button
           type="button"
-          onClick={() => controlsRef.current?.triggerAct("flirt")}
-          title="Heart Eyes"
-          aria-label="Heart Eyes"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
-        >
-          <Heart className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => controlsRef.current?.triggerAct("doze")}
-          title="Doze / Snore"
-          aria-label="Doze / Snore"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
-        >
-          <Moon className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
           onClick={() => controlsRef.current?.cycleHair()}
           title="Change Hijab Color"
           aria-label="Change Hijab Color"
@@ -1142,15 +1310,21 @@ export default function LivingPortrait() {
         </button>
       </div>
 
-      {/* Enlarged portrait frame with the user-provided static curtain background */}
-      <div className="relative w-full max-w-[420px] sm:max-w-[460px] aspect-square flex items-center justify-center overflow-hidden rounded-2xl border border-primary/40 bg-surface-2 shadow-glow-soft">
-        {/* Static background image provided by user */}
-        <img
-          src="/assets/aistudio/image_bd54e900.png"
-          alt=""
+      {/* Unclipped stage: stationary red box background behind the full cutout elastic WebGL portrait */}
+      <div className="relative w-full max-w-[420px] sm:max-w-[460px] aspect-square flex items-center justify-center overflow-visible">
+        {/* Separate red box background (stays 100% still while full cutout portrait with arms & shirt sits inside and can stretch outside) */}
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+          className="pointer-events-none absolute inset-0 rounded-2xl bg-primary shadow-[0_20px_70px_-15px_var(--glow)] ring-2 ring-foreground/15"
         />
+
+        {/* Tilted comic speech-bubble callout badge like rameerez.com */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-2 -top-3 z-30 rotate-3 rounded-lg border-2 border-background bg-card px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-foreground shadow-[3px_4px_0px_0px_rgba(0,0,0,0.85)] sm:text-xs"
+        >
+          <span>{bubbleText}</span>
+        </div>
 
         <div
           className="hero-portrait-wrap about-portrait-wrap"
@@ -1171,6 +1345,7 @@ export default function LivingPortrait() {
               alt="Portrait of Azka Azeem"
               width={1024}
               height={1024}
+              className="rounded-2xl opacity-0"
             />
             <canvas
               id="faceGl"

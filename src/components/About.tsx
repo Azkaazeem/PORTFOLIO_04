@@ -15,15 +15,6 @@ export default function About() {
     if (reduce || !root.current) return;
 
     const ctx = gsap.context(() => {
-      // Initial entrance
-      gsap.from("[data-about-media]", {
-        opacity: 0,
-        x: -40,
-        duration: 0.9,
-        ease: "power3.out",
-        scrollTrigger: { trigger: "[data-about-media]", start: "top 85%" },
-      });
-
       // Pin the section and scrub the text
       const tl = gsap.timeline({
         scrollTrigger: {

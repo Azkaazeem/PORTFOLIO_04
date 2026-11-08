@@ -161,3 +161,50 @@ test("computeSkillCardPose computes left stack, 360-degree loop-de-loop, and rig
   assert.equal(endLast.rotation, -360);
   assert.ok(endFirst.x > 1200 && endLast.x > 1200);
 });
+
+test("computeGrabWeight focuses on grabbed facial feature while anchoring shoulders and shirt", async () => {
+  const { computeGrabWeight, ROTATION } = await import("./living-portrait-math");
+  // Grab center on right cheek (0.58, 0.39) has full weight
+  const wCheek = computeGrabWeight(0.58, 0.39, 0, 0, 0.58, 0.39);
+  assert.ok(wCheek > 0.99, `Expected full weight on grabbed cheek, got ${wCheek}`);
+
+  // Distant nodes (e.g. rx = 1.05) decay smoothly so the whole head does not deform
+  const wOuter = computeGrabWeight(1.05, 0.39, 0, 0, 0.58, 0.39);
+  assert.ok(wOuter < 0.05, `Expected low weight at rx=1.05, got ${wOuter}`);
+
+  // Shoulders, arms, and shirt (ry >= 0.70) are anchored (weight = 0)
+  const wShoulders = computeGrabWeight(0.5, 0.72, 0, 0, 0.58, 0.39);
+  assert.equal(wShoulders, 0);
+
+  // Heart Eyes (flirt) and Sleep (doze) are removed from rotation
+  assert.equal(ROTATION.includes("flirt" as never), false);
+  assert.equal(ROTATION.includes("doze" as never), false);
+});
+
+test("resolvePreloaderPhase transitions through emblem, badgeFade, laser, split, and done", async () => {
+  const { resolvePreloaderPhase } = await import("./preloader-timeline");
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 200, assetsReady: false, skipped: false, autostart: false }),
+    "emblem",
+  );
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 800, assetsReady: false, skipped: false, autostart: false }),
+    "badgeFade",
+  );
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 1400, assetsReady: true, skipped: false, autostart: false }),
+    "laser",
+  );
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 1850, assetsReady: true, skipped: false, autostart: false }),
+    "split",
+  );
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 2400, assetsReady: true, skipped: false, autostart: false }),
+    "done",
+  );
+  assert.equal(
+    resolvePreloaderPhase({ elapsedMs: 100, assetsReady: false, skipped: true, autostart: false }),
+    "done",
+  );
+});

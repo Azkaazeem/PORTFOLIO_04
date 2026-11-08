@@ -26,16 +26,16 @@ export default function Hero() {
       ref={root}
       className="relative isolate flex min-h-[86vh] items-center justify-center overflow-hidden py-20 sm:py-28"
     >
-      {/* Low-opacity smoothly animated background image */}
+      {/* Smoothly animated background image at 0.45 (4-5) opacity */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <img
           src="/assets/aistudio/Untitled_design_63e8421d.jpg"
           alt=""
-          className="hero-bg-animate h-full w-full object-cover object-center opacity-[0.14] select-none"
+          className="hero-bg-animate h-full w-full object-cover object-center opacity-[0.45] select-none"
         />
         {/* Soft vignette & vertical gradient so text stays crisp */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/50 to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,var(--background)_90%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/65 via-background/35 to-background/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--background)_95%)]" />
       </div>
 
       {/* Subtle modern tech grid */}

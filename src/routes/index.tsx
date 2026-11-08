@@ -1,7 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import Lenis from "lenis";
-
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -13,8 +10,7 @@ import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import AgentChat from "@/components/AgentChat";
 import ScrollProgress from "@/components/ScrollProgress";
-
-import { ScrollTrigger } from "@/lib/gsap";
+import PortfolioPreloader from "@/components/PortfolioPreloader";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -56,37 +52,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
-
-    lenis.on("scroll", () => {
-      ScrollTrigger.update();
-    });
-
-    let rafId = 0;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-
-    rafId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PortfolioPreloader />
       <ScrollProgress />
       <CustomCursor />
       <Navbar />
