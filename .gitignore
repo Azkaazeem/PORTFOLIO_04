@@ -31,5 +31,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# Local AI tooling / project metadata
+.aistudio/
 *.aistudio
 AGENTS.md
