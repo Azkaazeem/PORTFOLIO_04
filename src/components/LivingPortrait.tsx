@@ -40,6 +40,8 @@ export default function LivingPortrait() {
   const handRef = useRef<SVGSVGElement | null>(null);
   const controlsRef = useRef<EngineControls | null>(null);
   const [bubbleText, setBubbleText] = useState("HEY! Drag & stretch my face!");
+  const [aboutActive, setAboutActive] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState<number>(-1);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -559,34 +561,44 @@ export default function LivingPortrait() {
     }
 
     function tugAct(): ActStep[] {
-      handTo = [1.3, 0.76];
+      handTo = [1.22, 0.68];
       hand!.style.opacity = "1";
       hand!.classList.remove("shut");
+      setBubbleText("WATCH! Grab & stretch my face like this!");
       const g = (
         u: number,
         v: number,
         ms: number,
         face: string,
         grip: false | "on" | "pull" | "off",
+        caption?: string,
       ): ActStep => [
         face,
         90,
         ms,
         {
           call: (now: number) => {
-            moveHand(u, v, ms * 0.8)(now);
+            moveHand(u, v, ms * 0.82)(now);
             handGrip = grip;
+            if (caption) setBubbleText(caption);
           },
         },
       ];
       return [
-        g(SPOT.cheekR[0], SPOT.cheekR[1], 760, "eye:se", false),
-        g(SPOT.cheekR[0], SPOT.cheekR[1], 240, "shock", "on"),
-        g(0.88, 0.32, 620, "ouch", "pull"),
-        g(0.68, 0.42, 240, "ouch", "pull"),
-        g(0.92, 0.28, 260, "scared", "pull"),
-        g(0.74, 0.38, 260, "ouch", "pull"),
-        g(1.35, 0.22, 1000, "dizzy", "off"),
+        g(SPOT.cheekR[0], SPOT.cheekR[1], 680, "eye:se", false),
+        g(
+          SPOT.cheekR[0],
+          SPOT.cheekR[1],
+          240,
+          "shock",
+          "on",
+          "OW! HEY, Someone's pulling my cheek!",
+        ),
+        g(0.75, 0.33, 560, "ouch", "pull"),
+        g(0.65, 0.42, 280, "ouch", "pull"),
+        g(0.77, 0.31, 300, "scared", "pull"),
+        g(0.67, 0.4, 280, "ouch", "pull"),
+        g(1.28, 0.24, 900, "dizzy", "off", "Your turn! Drag my face or try the side buttons!"),
         ["angry", 120, 620],
       ];
     }
@@ -929,6 +941,68 @@ export default function LivingPortrait() {
     );
     io.observe(canvas);
 
+    let inAboutView = false;
+    let autoTugTimer: ReturnType<typeof setTimeout> | null = null;
+    const highlightTimers: Array<ReturnType<typeof setTimeout>> = [];
+
+    const clearHighlightTimers = () => {
+      while (highlightTimers.length > 0) {
+        const t = highlightTimers.pop();
+        if (t) clearTimeout(t);
+      }
+    };
+
+    const runAboutEntranceDemo = () => {
+      setAboutActive(true);
+      clearHighlightTimers();
+      // Cascade highlight across all 5 side buttons so the user notices them immediately
+      for (let idx = 0; idx < 5; idx++) {
+        highlightTimers.push(
+          setTimeout(
+            () => {
+              if (!disposed) setHighlightIndex(idx);
+            },
+            180 + idx * 320,
+          ),
+        );
+      }
+      highlightTimers.push(
+        setTimeout(
+          () => {
+            if (!disposed) setHighlightIndex(-1);
+          },
+          180 + 5 * 320 + 250,
+        ),
+      );
+
+      if (autoTugTimer) clearTimeout(autoTugTimer);
+      autoTugTimer = setTimeout(() => {
+        if (disposed || pressed) return;
+        if (ready) {
+          controlsRef.current?.triggerAct("tug");
+        }
+      }, 320);
+    };
+
+    const aboutEntryIo = new IntersectionObserver(
+      (es) => {
+        const entry = es[0];
+        if (!entry) return;
+        if (entry.isIntersecting && !inAboutView) {
+          inAboutView = true;
+          runAboutEntranceDemo();
+        } else if (!entry.isIntersecting && inAboutView) {
+          inAboutView = false;
+          setAboutActive(false);
+          setHighlightIndex(-1);
+          clearHighlightTimers();
+          if (autoTugTimer) clearTimeout(autoTugTimer);
+        }
+      },
+      { threshold: 0.35 },
+    );
+    aboutEntryIo.observe(wrap);
+
     const ro = new ResizeObserver(() => {
       const r = Math.min(window.devicePixelRatio || 1, 2);
       const b = canvas.getBoundingClientRect();
@@ -1025,14 +1099,14 @@ export default function LivingPortrait() {
       ];
       place(hand!, hp[0], hp[1]);
       if (handGrip === "on" && !handHeld) {
-        takeHold(hp[0], hp[1], 0.24);
+        takeHold(hp[0], hp[1], 0.16);
         handHeld = true;
         hand!.classList.add("shut");
         handGrip = "pull";
       }
       if (handHeld && brush) {
-        brush.px = hp[0] - brush.u;
-        brush.py = hp[1] - brush.v;
+        brush.px = Math.max(-0.18, Math.min(0.18, hp[0] - brush.u));
+        brush.py = Math.max(-0.14, Math.min(0.14, hp[1] - brush.v));
       }
       if (handGrip === "off" && handHeld) {
         handHeld = false;
@@ -1217,12 +1291,14 @@ export default function LivingPortrait() {
       rafId = requestAnimationFrame(frame);
 
       const priorityKeys = [
-        "closed",
-        "half",
+        "downright",
         "shock",
         "ouch",
         "scared",
         "dizzy",
+        "angry",
+        "closed",
+        "half",
         "gum1",
         "gum2",
         "gum3",
@@ -1238,12 +1314,19 @@ export default function LivingPortrait() {
         return k ? loadPortraitTexture(k).then(next) : undefined;
       };
       for (let k = 0; k < 6; k++) next();
+
+      // If the user is already viewing the About section when WebGL finishes booting, trigger the hand tug
+      if (inAboutView && !pressed && !act) {
+        controlsRef.current?.triggerAct("tug");
+      }
     });
 
     return () => {
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
       if (manualLockTimer) clearTimeout(manualLockTimer);
+      if (autoTugTimer) clearTimeout(autoTugTimer);
+      clearHighlightTimers();
       window.removeEventListener("pointermove", onPointerMove);
       wrap.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", release);
@@ -1255,20 +1338,37 @@ export default function LivingPortrait() {
         b.removeEventListener("pointerleave", onContactLeave);
       });
       io.disconnect();
+      aboutEntryIo.disconnect();
       ro.disconnect();
     };
   }, []);
 
+  const sideBtnClass = (idx: number) => {
+    const isSpotlight = highlightIndex === idx;
+    if (isSpotlight) {
+      return "flex h-10 w-10 items-center justify-center rounded-full border-2 border-foreground bg-primary text-primary-foreground scale-125 shadow-[0_0_24px_rgba(230,57,70,0.95)] transition-all duration-300 cursor-pointer";
+    }
+    if (aboutActive) {
+      return "flex h-10 w-10 items-center justify-center rounded-full border border-primary/85 bg-primary/15 text-foreground shadow-[0_0_16px_rgba(230,57,70,0.45)] transition-all duration-300 hover:scale-110 hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer";
+    }
+    return "flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer";
+  };
+
   return (
     <div className="relative flex items-center justify-center gap-3.5 sm:gap-5 w-full">
       {/* Vertical rounded icon-only action rail docked on the left edge */}
-      <div className="z-30 flex flex-col gap-2.5" role="toolbar" aria-label="Portrait interactions">
+      <div
+        className="z-30 flex flex-col gap-2.5"
+        role="toolbar"
+        aria-label="Portrait interactions"
+        data-highlighted={aboutActive ? "true" : "false"}
+      >
         <button
           type="button"
           onClick={() => controlsRef.current?.triggerAct("fly")}
           title="Fly on Nose"
           aria-label="Fly on Nose"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className={sideBtnClass(0)}
         >
           <Bug className="h-4 w-4" />
         </button>
@@ -1277,7 +1377,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("tug")}
           title="Cheek Tug"
           aria-label="Cheek Tug"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className={sideBtnClass(1)}
         >
           <Hand className="h-4 w-4" />
         </button>
@@ -1286,7 +1386,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("gum")}
           title="Bubblegum"
           aria-label="Bubblegum"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className={sideBtnClass(2)}
         >
           <CircleDot className="h-4 w-4" />
         </button>
@@ -1295,7 +1395,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.triggerAct("sneeze")}
           title="Sneeze"
           aria-label="Sneeze"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className={sideBtnClass(3)}
         >
           <Wind className="h-4 w-4" />
         </button>
@@ -1304,7 +1404,7 @@ export default function LivingPortrait() {
           onClick={() => controlsRef.current?.cycleHair()}
           title="Change Hijab Color"
           aria-label="Change Hijab Color"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+          className={sideBtnClass(4)}
         >
           <Palette className="h-4 w-4" />
         </button>
