@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { X, Send } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { askAgent } from "@/lib/agent.functions";
 import aiChat from "../assets/chat ai.jpg";
@@ -22,9 +22,36 @@ export default function AgentChat() {
   const ask = useServerFn(askAgent);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const chatPanelRef = useRef<HTMLDivElement | null>(null);
+  const launcherBtnRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDownOutside = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (chatPanelRef.current?.contains(target)) return;
+      if (launcherBtnRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDownOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDownOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -103,8 +130,10 @@ export default function AgentChat() {
         </div>
       )}
 
-      {/* 3. Yahan import nahi likhna, direct button start karein */}
+      {/* Floating launcher button */}
       <button
+        ref={launcherBtnRef}
+        type="button"
         style={{
           backgroundImage: `url(${aiChat})`,
           backgroundSize: "cover",
@@ -118,16 +147,30 @@ export default function AgentChat() {
           }, 150);
         }}
         aria-label={open ? "Close chat" : "Chat with Azka's Agent"}
-        className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform hover:scale-105"
-      >
-        {open ? <X className="h-6 w-6 bg-primary/80 rounded-full p-1" /> : null}
-      </button>
+        className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform hover:scale-105 cursor-pointer"
+      />
 
       {open && (
-        <div className="surface-card fixed bottom-24 right-5 z-[80] flex h-[26rem] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden shadow-glow">
-          <div className="border-b border-border px-4 py-3">
-            <p className="font-display text-lg tracking-wide">AZKA&apos;S AGENT</p>
-            <p className="text-xs text-muted-foreground">Ask about Azka, her skills and projects</p>
+        <div
+          ref={chatPanelRef}
+          data-testid="agent-chat-panel"
+          className="surface-card fixed bottom-24 right-5 z-[80] flex h-[26rem] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden shadow-glow"
+        >
+          <div className="relative flex items-start justify-between border-b border-border px-4 py-3 pr-11">
+            <div>
+              <p className="font-display text-lg tracking-wide">AZKA&apos;S AGENT</p>
+              <p className="text-xs text-muted-foreground">
+                Ask about Azka, her skills and projects
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close chatbot"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border border-border/70 bg-background/80 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-3">

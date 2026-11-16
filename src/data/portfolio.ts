@@ -7,15 +7,10 @@ import cert6 from "@/assets/Certificates/6.jpg";
 
 import proj11 from "@/assets/Projects/11- Novadesk.png";
 import proj1 from "@/assets/Projects/01- Zakora.png";
-import proj2 from "@/assets/Projects/02- WanderLust.png";
 import proj3 from "@/assets/Projects/03- Fix My Area.png";
 import proj4 from "@/assets/Projects/04- SMIT Hub.png";
 import proj5 from "@/assets/Projects/05- Expense Tracker.png";
-import proj6 from "@/assets/Projects/06- Task Manager.png";
-import proj7 from "@/assets/Projects/07- Authentication & Authorization.png";
-import proj8 from "@/assets/Projects/08- Synth.png";
 import proj9 from "@/assets/Projects/09- Imtiaz Clone.png";
-import proj10 from "@/assets/Projects/10- Pet Accessories.png";
 
 export const navItems = [
   { label: "Home", id: "home" },
@@ -208,6 +203,27 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "MindNode Reverse Engineering",
+    tech: "Interactive Mind Mapping",
+    image: "/assets/aistudio/mindnode-reverse-engineering.vercel.app__44c2062a.png",
+    url: "https://mindnode-reverse-engineering.vercel.app/",
+    github: "https://github.com/Azkaazeem/MINDNODE_REVERSE_ENGINEERING",
+  },
+  {
+    name: "AI Bill Assistant",
+    tech: "AI Utility Bill Reader",
+    image: "/assets/aistudio/ai-bill-assesstent.vercel.app__8326c611.png",
+    url: "https://ai-bill-assesstent.vercel.app/",
+    github: "https://github.com/Azkaazeem/AI-BILL-ASSESSTENT",
+  },
+  {
+    name: "Islamic Tracker",
+    tech: "Prayer & Worship Tracker",
+    image: "/assets/aistudio/islamic-tracker-one.vercel.app__892b5871.png",
+    url: "https://islamic-tracker-one.vercel.app/",
+    github: "https://github.com/Azkaazeem/ISLAMIC_TRACKER",
+  },
+  {
     name: "NovaDesk",
     tech: "AI Customer Support Desk",
     image: proj11,
@@ -220,13 +236,6 @@ export const projects: Project[] = [
     image: proj1,
     url: "https://social-media-app-frontend-zakora.vercel.app/",
     github: "https://github.com/Azkaazeem/SOCIAL_MEDIA_APP_FRONTEND",
-  },
-  {
-    name: "WanderLust",
-    tech: "Travel Listings",
-    image: proj2,
-    url: "https://delta-project-chmye3djs-azka-azeems-projects.vercel.app/listings",
-    github: "https://github.com/Azkaazeem/DELTA_PROJECT",
   },
   {
     name: "Fix my area for PK",
@@ -250,39 +259,11 @@ export const projects: Project[] = [
     github: "https://github.com/Azkaazeem/FRONTEND_LAST_ASSIGNMENT",
   },
   {
-    name: "Task Manager",
-    tech: "Trello Clone",
-    image: proj6,
-    url: "https://trello-application-one.vercel.app/",
-    github: "https://github.com/Azkaazeem/Trello-Application",
-  },
-  {
-    name: "Complete Auth",
-    tech: "Authentication System",
-    image: proj7,
-    url: "https://complete-ten-classes-practice-memb.vercel.app/signin",
-    github: "https://github.com/Azkaazeem/COMPLETE_TEN_CLASSES_PRACTICE",
-  },
-  {
-    name: "Synth",
-    tech: "Web App",
-    image: proj8,
-    url: "https://synth-tawny.vercel.app/",
-    github: "https://github.com/Azkaazeem/SYNTH",
-  },
-  {
     name: "Imtiaz Store Clone",
     tech: "E-Commerce",
     image: proj9,
     url: "https://azkaazeem.github.io/Imtiaz-Store-clone-website/",
     github: "https://github.com/Azkaazeem/Imtiaz-Store-clone-website",
-  },
-  {
-    name: "Pet Accessories Store",
-    tech: "E-Commerce",
-    image: proj10,
-    url: "https://azkaazeem.github.io/Pet-Accessories-Store-/",
-    github: "https://github.com/Azkaazeem/Pet-Accessories-Store-",
   },
 ];
 
@@ -296,4 +277,4 @@ export const contact = {
   ],
 };
 
-export const cvUrl = "/assets/aistudio/Azka_Azeem_CV_dfe8aeaf.pdf";
+export const cvUrl = "/assets/aistudio/Azka_Azeem_CV_dfe8aeaf_a1832d31.pdf?v=2";
